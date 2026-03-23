@@ -1,0 +1,20 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "uber app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Pratik",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pratik-galave/uberwebsite.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pratik-galave/uberwebsite/issues"
+  },
+  "homepage": "https://github.com/pratik-galave/uberwebsite#readme"
+}
