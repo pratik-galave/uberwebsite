@@ -2,9 +2,11 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "uber app",
-  "main": "index.js",
+  "type": "module",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js"
   },
   "keywords": [],
   "author": "Pratik",
@@ -16,5 +18,14 @@
   "bugs": {
     "url": "https://github.com/pratik-galave/uberwebsite/issues"
   },
-  "homepage": "https://github.com/pratik-galave/uberwebsite#readme"
+  "homepage": "https://github.com/pratik-galave/uberwebsite#readme",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.0",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
 }
