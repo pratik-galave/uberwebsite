@@ -255,3 +255,129 @@ Send JSON with these required fields:
 
 - This route is mounted under `/captain` in [app.js](app.js).
 - `email` and `vehicle.vehiclePlate` should be unique.
+
+## Login Captain
+
+`POST /captain/login`
+
+Authenticates an existing captain and returns a JWT token.
+
+### Request Body
+
+Send JSON with these required fields:
+
+- `email`: captain email
+- `password`: captain password
+
+### Example Request
+
+```json
+{
+  "email": "rahul.captain1@example.com",
+  "password": "Captain@123"
+}
+```
+
+### Status Codes
+
+- `200 OK`: login successful
+- `400 Bad Request`: validation failed
+- `401 Unauthorized`: captain not found or invalid credentials
+
+### Success Response Example
+
+```json
+{
+  "message": "Login successful",
+  "token": "jwt-token-here"
+}
+```
+
+### Notes
+
+- The route also sets an HTTP-only `token` cookie on success.
+- This route is mounted under `/captain` in [app.js](app.js).
+
+## Get Captain Profile
+
+`GET /captain/profile`
+
+Returns the currently authenticated captain's profile.
+
+### Authentication
+
+This route requires a valid JWT token.
+
+Send the token in the `Authorization` header:
+
+```http
+Authorization: Bearer <token>
+```
+
+### Request Body
+
+No request body is required.
+
+### Status Codes
+
+- `200 OK`: profile returned successfully
+- `401 Unauthorized`: no token provided, token is blacklisted, or captain not found
+- `400 Bad Request`: token is invalid
+
+### Success Response Example
+
+```json
+{
+  "captain": {
+    "fullname": {
+      "firstname": "Rahul",
+      "lastname": "Sharma"
+    },
+    "email": "rahul.captain1@example.com",
+    "vehicle": {
+      "color": "Black",
+      "vehicleType": "car",
+      "vehiclePlate": "MH12AB1234",
+      "capacity": 4
+    }
+  }
+}
+```
+
+## Logout Captain
+
+`GET /captain/logout`
+
+Logs out the authenticated captain by clearing the cookie token and blacklisting the JWT.
+
+### Authentication
+
+This route requires a valid JWT token.
+
+Send the token in the `Authorization` header:
+
+```http
+Authorization: Bearer <token>
+```
+
+### Request Body
+
+No request body is required.
+
+### Status Codes
+
+- `200 OK`: logout successful
+- `401 Unauthorized`: no token provided or token is already blacklisted
+- `400 Bad Request`: token is invalid
+
+### Success Response Example
+
+```json
+{
+  "message": "Logout successful"
+}
+```
+
+### Notes
+
+- These routes are mounted under `/captain` in [app.js](app.js).
