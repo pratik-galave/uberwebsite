@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import connectDB from './db/db.js';
 import userRoutes from './routes/user.routes.js';
+import captainRoutes from './routes/captain.routes.js';
 import cookieParser from 'cookie-parser';
 connectDB();
 
@@ -11,6 +12,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/user', userRoutes);
+app.use('/captain', captainRoutes);
 
 app.get('/', (req, res) => {
     res.json({ message: 'Welcome to the Uber backend!' });

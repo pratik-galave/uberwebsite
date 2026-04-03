@@ -184,3 +184,74 @@ No request body is required.
 
 - Both routes are mounted under `/user` in [app.js](app.js).
 - If you want to document them as `/users/profile` and `/users/logout`, update the route mount in [app.js](app.js) accordingly.
+
+## Register Captain
+
+`POST /captain/register`
+
+Creates a new captain account.
+
+### Request Body
+
+Send JSON with these required fields:
+
+- `fullname.firstname`: string, minimum 3 characters
+- `fullname.lastname`: string, minimum 3 characters
+- `email`: non-empty string (should be a valid email)
+- `password`: non-empty string
+- `vehicle.color`: non-empty string
+- `vehicle.vehicleType`: non-empty string (`car`, `bike`, or `auto`)
+- `vehicle.vehiclePlate`: non-empty string
+- `vehicle.capacity`: non-empty number
+
+### Example Request
+
+```json
+{
+  "fullname": {
+    "firstname": "Rahul",
+    "lastname": "Sharma"
+  },
+  "email": "rahul.captain1@example.com",
+  "password": "Captain@123",
+  "vehicle": {
+    "color": "Black",
+    "vehicleType": "car",
+    "vehiclePlate": "MH12AB1234",
+    "capacity": 4
+  }
+}
+```
+
+### Status Codes
+
+- `201 Created`: captain registered successfully
+- `400 Bad Request`: validation failed, required fields missing, or captain already exists
+- `500 Internal Server Error`: unexpected server/database error
+
+### Success Response Example
+
+```json
+{
+  "message": "Captain registered successfully",
+  "captain": {
+    "fullname": {
+      "firstname": "Rahul",
+      "lastname": "Sharma"
+    },
+    "email": "rahul.captain1@example.com",
+    "vehicle": {
+      "color": "Black",
+      "vehicleType": "car",
+      "vehiclePlate": "MH12AB1234",
+      "capacity": 4
+    }
+  },
+  "token": "jwt-token-here"
+}
+```
+
+### Notes
+
+- This route is mounted under `/captain` in [app.js](app.js).
+- `email` and `vehicle.vehiclePlate` should be unique.
