@@ -4,16 +4,48 @@ import captainModel from './models/captain.model.js';
 import rideModel from './models/ride.model.js';
 
 let io = null;
+const PENDING_RIDE_REPLAY_WINDOW_MS = 2 * 60 * 1000;
+
+function getParticipantId(participant) {
+    if (!participant) {
+        return null;
+    }
+
+    return String(participant._id || participant);
+}
+
+function emitRideStatusUpdate(ride, updatedByType, updatedById) {
+    const payload = {
+        rideId: String(ride._id),
+        status: ride.status,
+        updatedByType,
+        updatedById: String(updatedById),
+        origin: ride.origin,
+        destination: ride.destination,
+        distanceText: ride.distanceText || '',
+        durationText: ride.durationText || '',
+    };
+
+    const recipientIds = [getParticipantId(ride.user), getParticipantId(ride.captain)].filter(Boolean);
+    const uniqueRecipientIds = [...new Set(recipientIds)];
+
+    uniqueRecipientIds.forEach((recipientId) => {
+        sendMessageToRoom(recipientId, payload, 'rideStatusUpdated');
+    });
+}
 
 async function replayPendingRidesForCaptain(captainId, socketId) {
     if (!captainId || !socketId) {
         return;
     }
 
+    const replayCutoff = new Date(Date.now() - PENDING_RIDE_REPLAY_WINDOW_MS);
+
     const pendingRides = await rideModel.find({
         status: 'requested',
         notifiedCaptains: captainId,
         captain: null,
+        createdAt: { $gte: replayCutoff },
     })
         .populate('user', 'fullname email')
         .sort({ createdAt: 1 })
@@ -25,6 +57,8 @@ async function replayPendingRidesForCaptain(captainId, socketId) {
             origin: ride.origin,
             destination: ride.destination,
             fare: ride.fare,
+            distanceText: ride.distanceText,
+            durationText: ride.durationText,
             user: ride.user
                 ? {
                     _id: ride.user._id,
@@ -245,63 +279,107 @@ export function initializeSocket(server) {
 
         socket.on('captainUpdateRideStatus', async (data) => {
             const { rideId, status } = data || {};
-            const captainId = socket.data?.userId;
-            const userType = socket.data?.userType;
+            const actorId = data?.actorId || socket.data?.userId;
+            const actorType = data?.actorType || socket.data?.userType;
 
-            if (userType !== 'captain' || !captainId || !rideId || !status) {
+            if (!['captain', 'user'].includes(actorType) || !actorId || !rideId || !status) {
                 return;
             }
 
-            const allowedStatuses = ['accepted', 'in_progress', 'completed', 'cancelled'];
+            const allowedStatuses = ['accepted', 'in_progress', 'completed'];
             if (!allowedStatuses.includes(status)) {
                 return;
             }
 
             try {
+                const ride = await rideModel.findById(rideId).select('user captain status origin destination distanceText durationText');
+
+                if (!ride) {
+                    return;
+                }
+
+                const rideUserId = getParticipantId(ride.user);
+                const rideCaptainId = getParticipantId(ride.captain);
+                const actorMatchesRide = (actorType === 'user' && rideUserId === String(actorId))
+                    || (actorType === 'captain' && rideCaptainId === String(actorId));
+
+                if (!actorMatchesRide) {
+                    return;
+                }
+
                 if (status === 'accepted') {
-                    await rideModel.updateOne(
+                    if (actorType !== 'captain') {
+                        return;
+                    }
+
+                    const updatedRide = await rideModel.findOneAndUpdate(
                         {
                             _id: rideId,
-                            status: 'requested',
+                            status: { $in: ['requested', 'accepted'] },
                             $or: [
                                 { captain: null },
-                                { captain: captainId },
+                                { captain: actorId },
                             ],
                         },
                         {
                             status: 'accepted',
-                            captain: captainId,
-                        }
+                            captain: actorId,
+                        },
+                        { new: true }
                     );
+
+                    if (updatedRide) {
+                        emitRideStatusUpdate(updatedRide, actorType, actorId);
+                    }
 
                     return;
                 }
 
                 if (status === 'in_progress') {
-                    await rideModel.updateOne(
+                    if (!['accepted', 'in_progress'].includes(ride.status)) {
+                        return;
+                    }
+
+                    const updatedRide = await rideModel.findOneAndUpdate(
                         {
                             _id: rideId,
+                            status: { $in: ['accepted', 'in_progress'] },
                             $or: [
-                                { captain: captainId },
-                                {
-                                    captain: null,
-                                    status: 'requested',
-                                },
+                                { captain: actorId },
+                                { user: actorId },
                             ],
                         },
-                        {
-                            status: 'in_progress',
-                            captain: captainId,
-                        }
+                        { status: 'in_progress' },
+                        { new: true }
                     );
+
+                    if (updatedRide) {
+                        emitRideStatusUpdate(updatedRide, actorType, actorId);
+                    }
 
                     return;
                 }
 
-                await rideModel.updateOne(
-                    { _id: rideId, captain: captainId },
-                    { status }
+                if (!['in_progress', 'completed'].includes(ride.status)) {
+                    return;
+                }
+
+                const updatedRide = await rideModel.findOneAndUpdate(
+                    {
+                        _id: rideId,
+                        status: { $in: ['in_progress', 'completed'] },
+                        $or: [
+                            { captain: actorId },
+                            { user: actorId },
+                        ],
+                    },
+                    { status: 'completed' },
+                    { new: true }
                 );
+
+                if (updatedRide) {
+                    emitRideStatusUpdate(updatedRide, actorType, actorId);
+                }
             } catch (error) {
                 console.error('Error handling captainUpdateRideStatus:', error.message);
             }

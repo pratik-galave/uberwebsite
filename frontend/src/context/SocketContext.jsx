@@ -7,7 +7,7 @@ const SocketContext = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false)
 
   useEffect(() => {
-    const socketUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_BASE_URL || 'http://localhost:3000'
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:4000'
 
     const socketInstance = io(socketUrl, {
       autoConnect: true,

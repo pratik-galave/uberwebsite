@@ -24,7 +24,9 @@ export async function getfare(pickup,destination) {
         return {
             car: calculateFare('car'),
             auto: calculateFare('auto'),
-            bike: calculateFare('bike')
+            bike: calculateFare('bike'),
+            distanceText: distance?.text || '',
+            durationText: duration?.text || ''
         };
     } else {
         throw new Error('Pickup and destination are required to calculate fare');
@@ -55,7 +57,15 @@ export async function createRide({ origin, destination, userId, vehicleType }) {
         throw new Error('All fields are required');
     }
     const fare = await getfare(origin, destination);
-    const ride = await rideModel.create({ origin, destination, user: userId, fare: fare[vehicleType], otp: getotp(6) });
+    const ride = await rideModel.create({
+        origin,
+        destination,
+        user: userId,
+        fare: fare[vehicleType],
+        otp: getotp(6),
+        distanceText: fare.distanceText,
+        durationText: fare.durationText,
+    });
     return ride;
 }
 

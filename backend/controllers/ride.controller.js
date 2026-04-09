@@ -23,6 +23,8 @@ export async function createRide(req, res) {
             origin: ride?.origin,
             destination: ride?.destination,
             fare: ride?.fare,
+            distanceText: ride?.distanceText,
+            durationText: ride?.durationText,
             vehicleType,
             user: user
                 ? {
@@ -67,6 +69,51 @@ export async function createRide(req, res) {
         console.error('Error creating ride:', error.message);
         res.status(500).json({ error: 'Failed to create ride' });
     }   
+}
+
+export async function getRideById(req, res) {
+    try {
+        const { rideId } = req.params;
+
+        if (!rideId) {
+            return res.status(400).json({ error: 'Ride ID is required' });
+        }
+
+        const ride = await rideModel.findById(rideId)
+            .populate('user', 'fullname email')
+            .populate('captain', 'fullname email');
+
+        if (!ride) {
+            return res.status(404).json({ error: 'Ride not found' });
+        }
+
+        const userId = req.user?._id ? String(req.user._id) : null;
+        const captainId = req.captain?._id ? String(req.captain._id) : null;
+        const rideUserId = ride.user?._id ? String(ride.user._id) : null;
+        const rideCaptainId = ride.captain?._id ? String(ride.captain._id) : null;
+
+        const isRideOwner = userId && rideUserId === userId;
+        const isRideCaptain = captainId && rideCaptainId === captainId;
+
+        if (!isRideOwner && !isRideCaptain) {
+            return res.status(403).json({ error: 'You do not have access to this ride' });
+        }
+
+        return res.status(200).json({
+            rideId: ride._id,
+            origin: ride.origin,
+            destination: ride.destination,
+            fare: ride.fare,
+            distanceText: ride.distanceText || '',
+            durationText: ride.durationText || '',
+            status: ride.status,
+            user: ride.user,
+            captain: ride.captain,
+        });
+    } catch (error) {
+        console.error('Error fetching ride details:', error.message);
+        return res.status(500).json({ error: 'Failed to fetch ride details' });
+    }
 }
 
 export async function getFare(req, res) {
