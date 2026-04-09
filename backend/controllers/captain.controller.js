@@ -1,7 +1,7 @@
 import blacklistTokenModel from "../models/blacklistToken.model.js";
 import captainModel from "../models/captain.model.js";
 import { createCaptain } from "../services/captain.service.js";
-import { cookie, validationResult } from 'express-validator';
+import { validationResult } from 'express-validator';
 
 export async function registerCaptain(req, res) {
     const errors = validationResult(req);
@@ -15,26 +15,32 @@ export async function registerCaptain(req, res) {
         return res.status(400).json({ error: 'All fields are required' });
     }
 
-    const isCaptainExist = await captainModel.findOne({ email });
-    if (isCaptainExist) {
-        return res.status(400).json({ error: 'Captain with this email already exists' });
+    try {
+        const isCaptainExist = await captainModel.findOne({ email });
+        if (isCaptainExist) {
+            return res.status(400).json({ error: 'Captain with this email already exists' });
+        }
+
+        const hashPassword = await captainModel.hashPassword(password);
+
+        const captain = await createCaptain({
+            firstname: fullname.firstname,
+            lastname: fullname.lastname,
+            email,
+            password: hashPassword,
+            color: vehicle.color,
+            vehicleType: vehicle.vehicleType,
+            vehiclePlate: vehicle.vehiclePlate,
+            capacity: vehicle.capacity
+        });
+
+        const token = captain.generateAuthToken();
+        res.cookie('token', token, { httpOnly: true });
+
+        return res.status(201).json({ message: 'Captain registered successfully', captain, token });
+    } catch (error) {
+        return res.status(400).json({ error: error.message });
     }
-
-    const hashPassword = await captainModel.hashPassword(password);
-    const  token = captainModel.generateAuthToken();
-    cookie.set('token', token, { httpOnly: true }); // Set token in cookie
-
-    const captain = await createCaptain({ 
-        firstname:fullname.firstname, 
-        lastname:fullname.lastname,
-        email,
-        password:hashPassword,
-        color:vehicle.color,
-        vehicleType:vehicle.vehicleType,
-        vehiclePlate:vehicle.vehiclePlate,
-        capacity:vehicle.capacity
-    });
-    return res.status(201).json({ message: 'Captain registered successfully', captain, token });
 }
 
 export async function loginCaptain(req, res) {

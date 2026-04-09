@@ -381,3 +381,187 @@ No request body is required.
 ### Notes
 
 - These routes are mounted under `/captain` in [app.js](app.js).
+
+## Maps Routes
+
+All maps routes are mounted under `/maps` in [app.js](app.js) and require user authentication.
+
+### Authentication
+
+Send a valid user JWT token in header:
+
+```http
+Authorization: Bearer <token>
+```
+
+## Get Coordinates
+
+`GET /maps/get-coordinates?address=<address>`
+
+Returns latitude and longitude for a given address.
+
+### Query Params
+
+- `address` (required): full address string
+
+### Status Codes
+
+- `200 OK`: coordinates returned
+- `400 Bad Request`: missing/invalid query
+- `500 Internal Server Error`: geocoding failed
+
+### Success Response Example
+
+```json
+{
+  "lat": 18.5204303,
+  "lng": 73.8567437
+}
+```
+
+## Get Distance And Time
+
+`GET /maps/get-distance-time?origin=<origin>&destination=<destination>`
+
+Returns distance and estimated duration between origin and destination.
+
+### Query Params
+
+- `origin` (required)
+- `destination` (required)
+
+### Status Codes
+
+- `200 OK`: distance and duration returned
+- `400 Bad Request`: missing/invalid query
+- `500 Internal Server Error`: distance lookup failed
+
+### Success Response Example
+
+```json
+{
+  "distance": {
+    "text": "249 km",
+    "value": 248783
+  },
+  "duration": {
+    "text": "4 hours 35 mins",
+    "value": 16474
+  },
+  "status": "OK"
+}
+```
+
+## Get Place Suggestions
+
+`GET /maps/get-suggestions?input=<searchText>`
+
+Returns a list of Google place autocomplete predictions.
+
+### Query Params
+
+- `input` (required): partial address/place text
+
+### Status Codes
+
+- `200 OK`: suggestions returned
+- `400 Bad Request`: missing/invalid query
+- `500 Internal Server Error`: suggestion lookup failed
+
+### Success Response Example
+
+```json
+[
+  {
+    "description": "Army Public School, Ridge Road, Dhaula Kuan, Delhi Cantonment, New Delhi, Delhi, India",
+    "place_id": "ChIJ...",
+    "reference": "ChIJ..."
+  }
+]
+```
+
+## Ride Routes
+
+All ride routes are mounted under `/ride` in [app.js](app.js) and require user authentication.
+
+### Authentication
+
+Send a valid user JWT token in header:
+
+```http
+Authorization: Bearer <token>
+```
+
+## Create Ride
+
+`POST /ride/create`
+
+Creates a ride request with computed fare and generated OTP.
+
+### Request Body
+
+- `origin` (required): string
+- `destination` (required): string
+- `userId` (required): MongoDB user id
+- `vehicleType` (required): one of `car`, `auto`, `bike`
+
+### Example Request
+
+```json
+{
+  "origin": "Pune",
+  "destination": "Solapur",
+  "userId": "<user-id>",
+  "vehicleType": "car"
+}
+```
+
+### Status Codes
+
+- `201 Created`: ride created
+- `400 Bad Request`: validation failed
+- `500 Internal Server Error`: ride creation failed
+
+### Success Response Example
+
+```json
+{
+  "origin": "Pune",
+  "destination": "Solapur",
+  "user": "<user-id>",
+  "fare": 2249,
+  "status": "requested",
+  "otp": "639325",
+  "_id": "<ride-id>",
+  "createdAt": "2026-04-07T22:58:01.239Z",
+  "updatedAt": "2026-04-07T22:58:01.239Z",
+  "__v": 0
+}
+```
+
+## Get Fare Estimate
+
+`GET /ride/get-fare?pickup=<pickup>&destination=<destination>`
+
+Returns estimated fare by vehicle type.
+
+### Query Params
+
+- `pickup` (required)
+- `destination` (required)
+
+### Status Codes
+
+- `200 OK`: fare object returned
+- `400 Bad Request`: missing/invalid query
+- `500 Internal Server Error`: fare calculation failed
+
+### Success Response Example
+
+```json
+{
+  "car": 2249,
+  "auto": 1492,
+  "bike": 979
+}
+```

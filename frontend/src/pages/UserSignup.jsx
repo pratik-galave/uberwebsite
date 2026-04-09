@@ -1,20 +1,63 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+
+import React, { useState,useContext } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import { UserDataContext } from '../context/userDataContext.js'
 
 const UserSignup = () => {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
 
-  const handleSubmit = (event) => {
-    event.preventDefault()
-    const data = { firstName, lastName, email, password }
-    console.log(data)
-    setFirstName('')
-    setLastName('')
-    setEmail('')
-    setPassword('')
+  const navigate = useNavigate()
+
+  const { setUserData } = useContext(UserDataContext)
+
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setErrorMessage('')
+
+    if (firstName.trim().length < 3 || lastName.trim().length < 3) {
+      setErrorMessage('First name and last name must be at least 3 characters long.')
+      return
+    }
+
+    if (password.length < 6) {
+      setErrorMessage('Password must be at least 6 characters long.')
+      return
+    }
+
+    const data = {
+      firstname: firstName.trim(),
+      lastname: lastName.trim(),
+      email: email.trim(),
+      password,
+    }
+    const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3000'
+
+    try {
+      const response = await axios.post(`${baseUrl}/user/register`, data)
+
+      if(response.status === 201){
+        const responseData = response.data
+        setUserData(responseData.user)
+        localStorage.setItem('token', responseData.token)
+        navigate('/home')
+      }
+
+      console.log(response)
+      setFirstName('')
+      setLastName('')
+      setEmail('')
+      setPassword('')
+    } catch (error) {
+      const validationMessage = error?.response?.data?.errors?.[0]?.msg
+      const apiMessage = error?.response?.data?.error
+      setErrorMessage(validationMessage || apiMessage || 'Signup failed. Please check your details and try again.')
+    }
   }
 
   return (
@@ -32,6 +75,8 @@ const UserSignup = () => {
               id="firstName"
               type="text"
               placeholder="First name"
+              required
+              minLength={3}
               value={firstName}
               onChange={(event) => setFirstName(event.target.value)}
               className="w-full rounded-xl border border-transparent bg-neutral-300 px-4 py-2.5 text-sm text-neutral-900 outline-none placeholder:text-neutral-500 focus:border-neutral-500"
@@ -40,6 +85,8 @@ const UserSignup = () => {
               id="lastName"
               type="text"
               placeholder="Last name"
+              required
+              minLength={3}
               value={lastName}
               onChange={(event) => setLastName(event.target.value)}
               className="w-full rounded-xl border border-transparent bg-neutral-300 px-4 py-2.5 text-sm text-neutral-900 outline-none placeholder:text-neutral-500 focus:border-neutral-500"
@@ -53,6 +100,7 @@ const UserSignup = () => {
             id="email"
             type="email"
             placeholder="email@example.com"
+            required
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             className="mb-5 w-full rounded-xl border border-transparent bg-neutral-300 px-4 py-2.5 text-sm text-neutral-900 outline-none placeholder:text-neutral-500 focus:border-neutral-500"
@@ -65,10 +113,18 @@ const UserSignup = () => {
             id="password"
             type="password"
             placeholder="password"
+            required
+            minLength={6}
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             className="mb-5 w-full rounded-xl border border-transparent bg-neutral-300 px-4 py-2.5 text-sm text-neutral-900 outline-none placeholder:text-neutral-500 focus:border-neutral-500"
           />
+
+          {errorMessage ? (
+            <p className="mb-5 rounded-lg bg-red-100 px-3 py-2 text-sm text-red-700">
+              {errorMessage}
+            </p>
+          ) : null}
 
           <button
             type="submit"

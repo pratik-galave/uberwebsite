@@ -1,16 +1,64 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useContext, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import { CaptainDataContext } from '../context/captainDataContext.js'
 
 const CaptainLogin = () => {
+  const navigate = useNavigate()
+  const { setCaptainData } = useContext(CaptainDataContext)
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
 
-  const handleSubmit = (e) => {
+  const normalizeCaptainData = (captain) => ({
+    _id: captain?._id ?? '',
+    email: captain?.email ?? '',
+    firstname: captain?.fullname?.firstname ?? '',
+    lastname: captain?.fullname?.lastname ?? '',
+    vehicleColor: captain?.vehicle?.color ?? '',
+    vehiclePlate: captain?.vehicle?.vehiclePlate ?? '',
+    vehicleCapacity: captain?.vehicle?.capacity?.toString?.() ?? '',
+    vehicleType: captain?.vehicle?.vehicleType ?? '',
+  })
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    const data = { email, password }
-    console.log(data)
-    setEmail('')
-    setPassword('')
+    setErrorMessage('')
+
+    const data = { email: email.trim(), password }
+    const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:4000'
+
+    try {
+      const loginResponse = await axios.post(`${baseUrl}/captain/login`, data)
+
+      if (loginResponse.status === 200) {
+        const token = loginResponse.data.token
+        if (token) {
+          localStorage.setItem('captainToken', token)
+        }
+
+        const profileResponse = await axios.get(`${baseUrl}/captain/profile`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        const captain = profileResponse?.data?.captain
+        const normalizedCaptain = normalizeCaptainData(captain)
+        setCaptainData(normalizedCaptain)
+        localStorage.setItem('captainData', JSON.stringify(normalizedCaptain))
+
+        navigate('/captain-home')
+      }
+
+      setEmail('')
+      setPassword('')
+    } catch (error) {
+      const validationMessage = error?.response?.data?.errors?.[0]?.msg
+      const apiMessage = error?.response?.data?.error
+      setErrorMessage(validationMessage || apiMessage || 'Captain login failed. Please try again.')
+    }
   }
 
   return (
@@ -26,6 +74,7 @@ const CaptainLogin = () => {
             id="email"
             type="email"
             placeholder="email@example.com"
+            required
             className="mb-7 w-full rounded-xl border border-transparent bg-neutral-300 px-4 py-3 text-base text-neutral-900 outline-none placeholder:text-neutral-500 focus:border-neutral-500"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -38,10 +87,18 @@ const CaptainLogin = () => {
             id="password"
             type="password"
             placeholder="password"
+            required
+            minLength={6}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="mb-7 w-full rounded-xl border border-transparent bg-neutral-300 px-4 py-3 text-base text-neutral-900 outline-none placeholder:text-neutral-500 focus:border-neutral-500"
           />
+
+          {errorMessage ? (
+            <p className="mb-5 rounded-lg bg-red-100 px-3 py-2 text-sm text-red-700">
+              {errorMessage}
+            </p>
+          ) : null}
 
           <button
             type="submit"
