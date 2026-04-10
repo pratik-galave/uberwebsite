@@ -1,12 +1,10 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import axios from 'axios'
-import { IoArrowBackOutline } from 'react-icons/io5'
+import { IoArrowBackOutline, IoNavigate } from 'react-icons/io5'
 import RideDirectionsPanel from '../componenets/rideDirectionsPanel.jsx'
 import MakePaymentPanel from '../componenets/makePaymentPanel.jsx'
 import { SocketDataContext } from '../context/socketDataContext.js'
 import { CaptainDataContext } from '../context/captainDataContext.js'
-import { UserDataContext } from '../context/userDataContext.js'
 import LiveTracking from '../componenets/liveTracking.jsx'
 
 const CaptainRideNavigation = () => {
@@ -15,32 +13,13 @@ const CaptainRideNavigation = () => {
   const [isRideStarted, setIsRideStarted] = useState(false)
   const [isPaymentPanelOpen, setIsPaymentPanelOpen] = useState(false)
   const [captainLocation, setCaptainLocation] = useState(null)
-  const [rideDetails, setRideDetails] = useState({})
-  const { sendMessageToEvent, receiveMessageFromEvent, isConnected } = useContext(SocketDataContext)
+  const { sendMessageToEvent, receiveMessageFromEvent } = useContext(SocketDataContext)
   const { captainData } = useContext(CaptainDataContext)
-  const { userData } = useContext(UserDataContext)
-  const isCaptainView = location.pathname === '/captain-ride'
-  const isUserView = !isCaptainView
-  const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:4000'
-  const rideStatus = rideDetails.status || (isRideStarted ? 'in_progress' : '')
-  const rideHasStarted = rideStatus === 'in_progress'
-  const rideHasCompleted = rideStatus === 'completed'
+  const isCaptainView = Boolean(localStorage.getItem('captainToken'))
 
   const rideId = isCaptainView
     ? (location.state?.rideId || localStorage.getItem('activeCaptainRideId') || null)
     : (location.state?.rideId || localStorage.getItem('activeUserRideId') || null)
-
-  const rideSummaryFromState = useMemo(() => ({
-    origin: location.state?.origin || '',
-    destination: location.state?.destination || '',
-    distanceText: location.state?.distanceText || '',
-    durationText: location.state?.durationText || '',
-    fare: location.state?.fare || '',
-  }), [location.state?.destination, location.state?.distanceText, location.state?.durationText, location.state?.fare, location.state?.origin])
-
-  useEffect(() => {
-    setRideDetails(rideSummaryFromState)
-  }, [rideSummaryFromState])
 
   useEffect(() => {
     if (location.state?.rideId && isCaptainView) {
@@ -53,118 +32,6 @@ const CaptainRideNavigation = () => {
       localStorage.setItem('activeUserRideId', String(location.state.rideId))
     }
   }, [isCaptainView, location.state?.rideId])
-
-  useEffect(() => {
-    if (!isConnected) {
-      return
-    }
-
-    if (isCaptainView && captainData?._id) {
-      sendMessageToEvent('join', {
-        userType: 'captain',
-        userId: captainData._id,
-      })
-      return
-    }
-
-    if (isUserView && userData?._id) {
-      sendMessageToEvent('join', {
-        userType: 'user',
-        userId: userData._id,
-      })
-    }
-  }, [captainData?._id, isCaptainView, isConnected, isUserView, sendMessageToEvent, userData?._id])
-
-  useEffect(() => {
-    if (!rideId) {
-      return undefined
-    }
-
-    if (rideSummaryFromState.destination && rideSummaryFromState.distanceText) {
-      return undefined
-    }
-
-    let isCancelled = false
-
-    const loadRideDetails = async () => {
-      try {
-        const token = localStorage.getItem(isCaptainView ? 'captainToken' : 'token')
-        const response = await axios.get(`${baseUrl}/ride/${rideId}`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        })
-
-        if (!isCancelled) {
-          setRideDetails((currentDetails) => ({
-            ...currentDetails,
-            ...response.data,
-          }))
-
-          if (response.data?.status === 'in_progress') {
-            setIsRideStarted(true)
-          }
-
-          if (response.data?.status === 'completed') {
-            setIsRideStarted(true)
-            if (isUserView) {
-              setIsPaymentPanelOpen(true)
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Failed to load ride details:', error?.response?.data?.error || error.message)
-      }
-    }
-
-    loadRideDetails()
-
-    return () => {
-      isCancelled = true
-    }
-  }, [baseUrl, isCaptainView, isUserView, rideId, rideSummaryFromState.destination, rideSummaryFromState.distanceText])
-
-  useEffect(() => {
-    const unsubscribeRideStatusUpdated = receiveMessageFromEvent('rideStatusUpdated', (payload) => {
-      if (!payload?.rideId || String(payload.rideId) !== String(rideId)) {
-        return
-      }
-
-      setRideDetails((currentDetails) => ({
-        ...currentDetails,
-        ...payload,
-      }))
-
-      if (payload.status === 'in_progress') {
-        setIsRideStarted(true)
-        setIsPaymentPanelOpen(false)
-        return
-      }
-
-      if (payload.status === 'completed') {
-        setIsRideStarted(true)
-        if (isUserView) {
-          setIsPaymentPanelOpen(true)
-        } else {
-          setIsPaymentPanelOpen(false)
-        }
-      }
-    })
-
-    return () => unsubscribeRideStatusUpdated()
-  }, [isUserView, receiveMessageFromEvent, rideId])
-
-  useEffect(() => {
-    if (!rideHasCompleted) {
-      return
-    }
-
-    if (isCaptainView) {
-      localStorage.removeItem('activeCaptainRideId')
-      navigate('/captain-home')
-      return
-    }
-
-    setIsPaymentPanelOpen(true)
-  }, [isCaptainView, navigate, rideHasCompleted])
 
   useEffect(() => {
     if (isCaptainView) {
@@ -223,45 +90,36 @@ const CaptainRideNavigation = () => {
     return () => window.clearInterval(locationInterval)
   }, [captainData?._id, isCaptainView, sendMessageToEvent])
 
-  const handleRideAction = () => {
-    if (!rideId) {
+  const handleStartRide = () => {
+    if (!isCaptainView) {
       return
     }
 
-    const nextStatus = rideHasStarted ? 'completed' : 'in_progress'
-    const actorId = isCaptainView ? captainData?._id : userData?._id
-    const actorType = isCaptainView ? 'captain' : 'user'
-
-    setRideDetails((currentDetails) => ({
-      ...currentDetails,
-      status: nextStatus,
-    }))
-
-    if (nextStatus === 'in_progress') {
-      setIsRideStarted(true)
-      setIsPaymentPanelOpen(false)
+    if (rideId) {
+      sendMessageToEvent('captainUpdateRideStatus', {
+        rideId,
+        status: 'in_progress',
+      })
     }
 
-    if (nextStatus === 'completed' && isUserView) {
-      setIsPaymentPanelOpen(true)
-    }
-
-    sendMessageToEvent('captainUpdateRideStatus', {
-      rideId,
-      status: nextStatus,
-      actorId,
-      actorType,
-    })
+    setIsRideStarted(true)
   }
 
   const handleRideCompleted = () => {
-    if (!isUserView) {
+    if (!isCaptainView) {
       return
     }
 
-    localStorage.removeItem('activeUserRideId')
-    setIsPaymentPanelOpen(false)
-    navigate('/home')
+    if (rideId) {
+      sendMessageToEvent('captainUpdateRideStatus', {
+        rideId,
+        status: 'completed',
+      })
+    }
+
+    localStorage.removeItem('activeCaptainRideId')
+
+    navigate('/captain-home')
   }
 
   return (
@@ -292,26 +150,47 @@ const CaptainRideNavigation = () => {
         </div>
       </header>
 
-      <RideDirectionsPanel
-        destination={rideDetails.destination || rideSummaryFromState.destination}
-        distance={rideDetails.distanceText || rideSummaryFromState.distanceText}
-        statusMessage={rideHasCompleted
-          ? (isUserView ? 'Ride completed. Please complete payment.' : 'Ride completed. Return to the captain home screen when ready.')
-          : rideHasStarted
-            ? 'Ride in progress. End the ride when you reach the destination.'
-            : 'Confirm the destination before starting the ride.'}
-        actionLabel={rideHasCompleted ? '' : (rideHasStarted ? 'End Ride' : 'Start Ride')}
-        onAction={handleRideAction}
-        showAction={!rideHasCompleted}
-      />
+      {isCaptainView ? (
+      <div className="absolute inset-x-0 bottom-0 z-20 rounded-t-3xl bg-white px-4 pb-5 pt-4 shadow-[0_-12px_30px_rgba(0,0,0,0.24)]">
+        <div className="mx-auto mb-3 h-1.5 w-14 rounded-full bg-neutral-300" />
 
-      {isUserView && isPaymentPanelOpen ? (
-        <MakePaymentPanel
-          customerName={rideDetails.captain?.fullname
-            ? [rideDetails.captain.fullname.firstname, rideDetails.captain.fullname.lastname].filter(Boolean).join(' ').trim()
-            : 'Your captain'}
+        <div className="flex items-start gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-400 text-sm font-semibold text-black">
+            A
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <p className="text-sm text-neutral-400">Pick up at</p>
+            <p className="text-[1.7rem] font-semibold leading-tight text-black">7958 Swift Village</p>
+            <p className="mt-1 text-base text-neutral-500">5 min away · 2.2 km</p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleStartRide}
+          className="mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-black text-lg font-semibold text-white transition hover:bg-neutral-800"
+        >
+          <IoNavigate className="h-5 w-5" />
+          Start Ride
+        </button>
+      </div>
+      ) : null}
+
+      {isCaptainView && isRideStarted ? (
+        <RideDirectionsPanel
+          pickup="7958 Swift Village"
+          est="5 min"
+          distance="2.2 km"
           fare="$25.00"
-          viewRole="user"
+          onDropOff={() => setIsPaymentPanelOpen(true)}
+        />
+      ) : null}
+
+      {isCaptainView && isPaymentPanelOpen ? (
+        <MakePaymentPanel
+          customerName="Esther Berry"
+          fare="$25.00"
           onDone={handleRideCompleted}
         />
       ) : null}

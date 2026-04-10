@@ -27,41 +27,6 @@ export async function authUser(req, res, next) {
     }
 }
 
-export async function authEitherUserOrCaptain(req, res, next) {
-    const authHeader = req.headers.authorization;
-    const token = req.cookies?.token || authHeader?.split(' ')[1];
-    if (!token) {
-        return res.status(401).json({ error: 'Access denied. No token provided.' });
-    }
-
-    const isBlacklistedToken = await blacklistTokenModel.findOne({ token : token });
-    if (isBlacklistedToken) {
-        return res.status(401).json({ error: 'Token has been blacklisted. Please log in again.' });
-     }
-
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const [user, captain] = await Promise.all([
-            userModel.findById(decoded._id),
-            captainModel.findById(decoded._id),
-        ]);
-
-        if (user) {
-            req.user = user;
-            return next();
-        }
-
-        if (captain) {
-            req.captain = captain;
-            return next();
-        }
-
-        return res.status(401).json({ error: 'Account not found' });
-    } catch (error) {
-        return res.status(400).json({ error: 'Invalid token.' });
-    }
-}
-
 export async function authCaptain(req, res, next) {
     const authHeader = req.headers.authorization;
     const token = req.cookies?.token || authHeader?.split(' ')[1];
@@ -89,8 +54,7 @@ export async function authCaptain(req, res, next) {
 
 const authMiddleware = {
     authUser,
-    authCaptain,
-    authEitherUserOrCaptain 
+    authCaptain 
 };
 
 export default authMiddleware;

@@ -27,12 +27,6 @@ const rideSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    distanceText: {
-        type: String
-    },
-    durationText: {
-        type: String
-    },
     status: {
         type: String,
         enum: ['requested', 'accepted', 'in_progress', 'completed', 'cancelled'],

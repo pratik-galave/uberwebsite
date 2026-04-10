@@ -18,9 +18,5 @@ router.get('/get-fare',
     authMiddleware.authUser,
     rideController.getFare
 );
-router.get('/:rideId',
-    authMiddleware.authEitherUserOrCaptain,
-    rideController.getRideById
-);
 
 export default router;
