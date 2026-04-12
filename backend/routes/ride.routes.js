@@ -7,15 +7,15 @@ import authMiddleware from '../middleware/auth.middleware.js';
 router.post('/create', 
     body('origin').notEmpty().withMessage('Origin is required'),
     body('destination').notEmpty().withMessage('Destination is required'),
-    body('userId').notEmpty().withMessage('User ID is required'),
-    body('vehicleType').notEmpty().withMessage('Vehicle type is required'),
+    body('vehicleType')
+        .notEmpty().withMessage('Vehicle type is required')
+        .isIn(['car', 'auto', 'bike']).withMessage('Vehicle type must be car, auto, or bike'),
     authMiddleware.authUser,
     rideController.createRide
 );
 router.get('/get-fare', 
     query('pickup').notEmpty().withMessage('Pickup location is required'),
     query('destination').notEmpty().withMessage('Destination is required'),
-    authMiddleware.authUser,
     rideController.getFare
 );
 

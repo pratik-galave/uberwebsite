@@ -20,17 +20,22 @@ const LiveTracking = ({ captainLocation }) => {
 	})
 
 	const markerPosition = useMemo(() => {
-		if (
-			!captainLocation
-			|| typeof captainLocation.latitude !== 'number'
-			|| typeof captainLocation.longitude !== 'number'
-		) {
+		if (!captainLocation) {
+			return null
+		}
+
+		const latitudeRaw = captainLocation.latitude ?? captainLocation.lat
+		const longitudeRaw = captainLocation.longitude ?? captainLocation.lng
+		const latitude = Number(latitudeRaw)
+		const longitude = Number(longitudeRaw)
+
+		if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
 			return null
 		}
 
 		return {
-			lat: captainLocation.latitude,
-			lng: captainLocation.longitude,
+			lat: latitude,
+			lng: longitude,
 		}
 	}, [captainLocation])
 

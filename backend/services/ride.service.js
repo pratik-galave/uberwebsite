@@ -6,7 +6,23 @@ export async function getfare(pickup,destination) {
     if(pickup && destination) {
         const baseFares = { car: 40, auto: 25, bike: 15 };
         const perMinuteRates = { car: 0.8, auto: 0.5, bike: 0.25 };
-        const { distance, duration } = await getDistanceAndTime(pickup, destination);
+        let distance = null;
+        let duration = null;
+
+        try {
+            const distanceAndDuration = await getDistanceAndTime(pickup, destination);
+            distance = distanceAndDuration?.distance || null;
+            duration = distanceAndDuration?.duration || null;
+        } catch (error) {
+            console.error('Falling back to base fares because distance lookup failed:', error.message);
+
+            return {
+                car: baseFares.car,
+                auto: baseFares.auto,
+                bike: baseFares.bike,
+            };
+        }
+
         const perKmRates = { car: 9, auto: 6, bike: 4 };
         const distanceInKm = (distance?.value || 0) / 1000;
         const durationInMinutes = (duration?.value || 0) / 60;
@@ -50,12 +66,39 @@ function getotp(num) {
     return otp;
 }
 
-export async function createRide({ origin, destination, userId, vehicleType }) {
+export async function createRide({ origin, destination, userId, vehicleType, fare }) {
     if (!origin || !destination || !userId || !vehicleType) {
         throw new Error('All fields are required');
     }
-    const fare = await getfare(origin, destination);
-    const ride = await rideModel.create({ origin, destination, user: userId, fare: fare[vehicleType], otp: getotp(6) });
+
+    const allowedVehicleTypes = ['car', 'auto', 'bike'];
+    if (!allowedVehicleTypes.includes(vehicleType)) {
+        throw new Error('Invalid vehicle type');
+    }
+
+    const baseFares = { car: 40, auto: 25, bike: 15 };
+    let resolvedFare = Number(fare);
+
+    if (!Number.isFinite(resolvedFare) || resolvedFare <= 0) {
+        try {
+            const calculatedFare = await getfare(origin, destination);
+            resolvedFare = Number(calculatedFare?.[vehicleType]);
+        } catch {
+            resolvedFare = baseFares[vehicleType];
+        }
+    }
+
+    if (!Number.isFinite(resolvedFare) || resolvedFare <= 0) {
+        throw new Error('Unable to determine fare for this ride');
+    }
+
+    const ride = await rideModel.create({
+        origin,
+        destination,
+        user: userId,
+        fare: Math.round(resolvedFare),
+        otp: getotp(6),
+    });
     return ride;
 }
 

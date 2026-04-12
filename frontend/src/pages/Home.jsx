@@ -354,7 +354,7 @@ const Home = () => {
     }
 
     let isCancelled = false
-    const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:4000'
+    const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3000'
     const token = localStorage.getItem('token')
 
     const timer = setTimeout(async () => {
@@ -422,7 +422,7 @@ const Home = () => {
     }
 
     const token = localStorage.getItem('token')
-    const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:4000'
+    const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3000'
 
     if (!token) {
       setCreateRideError('You are not logged in. Please login again.')

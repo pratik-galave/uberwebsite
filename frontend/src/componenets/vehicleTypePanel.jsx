@@ -16,7 +16,7 @@ const VehicleTypePanel = ({ pickupLocation, destination, onBack, onSelectVehicle
 
     let isCancelled = false
     const token = localStorage.getItem('token')
-    const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:4000'
+    const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3000'
 
     const fetchFare = async () => {
       try {

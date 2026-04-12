@@ -188,6 +188,12 @@ const CaptainHome = () => {
   }
 
   const handleIgnoreRide = () => {
+    if (incomingRideRequest?.rideId) {
+      sendMessageToEvent('captainIgnoreRide', {
+        rideId: incomingRideRequest.rideId,
+      })
+    }
+
     setIsRequestPanelOpen(false)
     setIncomingRideRequest(null)
     setEnteredOtp('')

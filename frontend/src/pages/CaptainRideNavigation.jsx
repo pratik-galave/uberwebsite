@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { IoArrowBackOutline, IoNavigate } from 'react-icons/io5'
 import RideDirectionsPanel from '../componenets/rideDirectionsPanel.jsx'
-import MakePaymentPanel from '../componenets/makePaymentPanel.jsx'
 import { SocketDataContext } from '../context/socketDataContext.js'
 import { CaptainDataContext } from '../context/captainDataContext.js'
 import LiveTracking from '../componenets/liveTracking.jsx'
@@ -11,11 +10,10 @@ const CaptainRideNavigation = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const [isRideStarted, setIsRideStarted] = useState(false)
-  const [isPaymentPanelOpen, setIsPaymentPanelOpen] = useState(false)
   const [captainLocation, setCaptainLocation] = useState(null)
   const { sendMessageToEvent, receiveMessageFromEvent } = useContext(SocketDataContext)
   const { captainData } = useContext(CaptainDataContext)
-  const isCaptainView = Boolean(localStorage.getItem('captainToken'))
+  const isCaptainView = location.pathname === '/captain-ride'
 
   const rideId = isCaptainView
     ? (location.state?.rideId || localStorage.getItem('activeCaptainRideId') || null)
@@ -183,15 +181,7 @@ const CaptainRideNavigation = () => {
           est="5 min"
           distance="2.2 km"
           fare="$25.00"
-          onDropOff={() => setIsPaymentPanelOpen(true)}
-        />
-      ) : null}
-
-      {isCaptainView && isPaymentPanelOpen ? (
-        <MakePaymentPanel
-          customerName="Esther Berry"
-          fare="$25.00"
-          onDone={handleRideCompleted}
+          onDropOff={handleRideCompleted}
         />
       ) : null}
     </main>

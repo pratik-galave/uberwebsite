@@ -68,17 +68,82 @@ export const getSuggestions = async (input) => {
     if (!apiKey) {
         throw new Error('Google Maps API key is not configured');
     }
-    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(input)}&key=${apiKey}`;
+    const normalizedInput = input.trim();
+    const placesUrl = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(normalizedInput)}&key=${apiKey}`;
+    const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(normalizedInput)}&key=${apiKey}`;
 
     try {
-        const response = await axios.get(url);
+        const response = await axios.get(placesUrl);
+        if (response.data.status === 'ZERO_RESULTS') {
+            return [];
+        }
+
         if (response.data.status !== 'OK') {
-            throw new Error('Unable to fetch suggestions for the provided input');
+            throw new Error(response.data.status || 'Unable to fetch suggestions for the provided input');
         }
         return response.data.predictions;
     } catch (error) {
-        console.error('Error fetching suggestions:', error.message);
-        throw new Error('Failed to fetch suggestions');
+        console.error('Places autocomplete failed, trying geocode fallback:', error.message);
+
+        try {
+            const geocodeResponse = await axios.get(geocodeUrl);
+
+            if (geocodeResponse.data.status === 'ZERO_RESULTS') {
+                return [];
+            }
+
+            if (geocodeResponse.data.status !== 'OK') {
+                throw new Error(geocodeResponse.data.status || 'Geocode fallback request failed');
+            }
+
+            const results = Array.isArray(geocodeResponse.data.results)
+                ? geocodeResponse.data.results
+                : [];
+
+            return results.slice(0, 5).map((result) => ({
+                description: result.formatted_address,
+                place_id: result.place_id,
+            }));
+        } catch (fallbackError) {
+            console.error('Geocode fallback failed:', fallbackError.message);
+
+            try {
+                const nominatimResponse = await axios.get('https://nominatim.openstreetmap.org/search', {
+                    params: {
+                        q: normalizedInput,
+                        format: 'json',
+                        addressdetails: 1,
+                        limit: 5,
+                    },
+                    headers: {
+                        'User-Agent': 'uber-app/1.0 (local-dev)',
+                    },
+                    timeout: 5000,
+                });
+
+                const places = Array.isArray(nominatimResponse.data) ? nominatimResponse.data : [];
+
+                if (!places.length) {
+                    return [
+                        { description: normalizedInput },
+                        { description: `${normalizedInput}, Pune` },
+                        { description: `${normalizedInput}, Maharashtra` },
+                    ];
+                }
+
+                return places.map((item) => ({
+                    description: item.display_name,
+                    place_id: item.place_id ? String(item.place_id) : undefined,
+                })).filter((item) => Boolean(item.description));
+            } catch (osmError) {
+                console.error('Nominatim fallback failed:', osmError.message);
+                return [
+                    { description: normalizedInput },
+                    { description: `${normalizedInput}, Pune` },
+                    { description: `${normalizedInput}, Maharashtra` },
+                ];
+            }
+        }
     }
 }
 

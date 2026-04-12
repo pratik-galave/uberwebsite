@@ -54,6 +54,6 @@ export const getSuggestions = async (req, res) => {
         res.json(suggestions);
     } catch (error) {
         console.error('Error fetching suggestions:', error.message);
-        res.status(500).json({ error: 'Failed to fetch suggestions' });
+        res.json([]);
     }
 };

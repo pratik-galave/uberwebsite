@@ -14,6 +14,6 @@ router.get('/get-distance-time', [
     query('destination').notEmpty().withMessage('Destination query parameter is required')
 ], authMiddleware.authUser, mapsController.getDistance);
 
-router.get('/get-suggestions', authMiddleware.authUser, mapsController.getSuggestions);
+router.get('/get-suggestions', mapsController.getSuggestions);
 
 export default router;

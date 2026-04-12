@@ -10,10 +10,13 @@ async function replayPendingRidesForCaptain(captainId, socketId) {
         return;
     }
 
+    const replayWindowStart = new Date(Date.now() - (2 * 60 * 60 * 1000));
+
     const pendingRides = await rideModel.find({
         status: 'requested',
         notifiedCaptains: captainId,
         captain: null,
+        createdAt: { $gte: replayWindowStart },
     })
         .populate('user', 'fullname email')
         .sort({ createdAt: 1 })
@@ -304,6 +307,31 @@ export function initializeSocket(server) {
                 );
             } catch (error) {
                 console.error('Error handling captainUpdateRideStatus:', error.message);
+            }
+        });
+
+        socket.on('captainIgnoreRide', async (data) => {
+            const { rideId } = data || {};
+            const captainId = socket.data?.userId;
+            const userType = socket.data?.userType;
+
+            if (userType !== 'captain' || !captainId || !rideId) {
+                return;
+            }
+
+            try {
+                await rideModel.updateOne(
+                    {
+                        _id: rideId,
+                        status: 'requested',
+                        captain: null,
+                    },
+                    {
+                        $pull: { notifiedCaptains: captainId },
+                    }
+                );
+            } catch (error) {
+                console.error('Error handling captainIgnoreRide:', error.message);
             }
         });
 
