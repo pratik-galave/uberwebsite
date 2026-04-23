@@ -5,6 +5,21 @@ import rideModel from './models/ride.model.js';
 
 let io = null;
 
+const normalizeCoordinates = (value) => {
+    if (!value || typeof value !== 'object') {
+        return null;
+    }
+
+    const lat = Number(value.lat);
+    const lng = Number(value.lng ?? value.lon);
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+        return null;
+    }
+
+    return { lat, lng };
+};
+
 async function replayPendingRidesForCaptain(captainId, socketId) {
     if (!captainId || !socketId) {
         return;
@@ -27,6 +42,8 @@ async function replayPendingRidesForCaptain(captainId, socketId) {
             rideId: String(ride._id),
             origin: ride.origin,
             destination: ride.destination,
+            pickupCoordinates: normalizeCoordinates(ride.pickupCoordinates),
+            destinationCoordinates: normalizeCoordinates(ride.destinationCoordinates),
             fare: ride.fare,
             user: ride.user
                 ? {
@@ -179,7 +196,7 @@ export function initializeSocket(server) {
             }
 
             try {
-                const ride = await rideModel.findById(rideId).select('+otp user');
+                const ride = await rideModel.findById(rideId).select('+otp');
 
                 if (!ride?.user || !ride?.otp) {
                     return;
@@ -198,6 +215,11 @@ export function initializeSocket(server) {
                         otp: ride.otp,
                         captainId: acceptedCaptainId,
                         captainName: captainName || 'Your captain',
+                        origin: ride.origin,
+                        destination: ride.destination,
+                        pickupCoordinates: normalizeCoordinates(ride.pickupCoordinates),
+                        destinationCoordinates: normalizeCoordinates(ride.destinationCoordinates),
+                        fare: ride.fare,
                     },
                     'rideAccepted'
                 );

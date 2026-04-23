@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { IoLogOutOutline } from 'react-icons/io5'
-import mapImage from '../assets/map.jpg'
+import LiveTracking from '../componenets/liveTracking.jsx'
 import CustomerRequestPanel from '../componenets/customerRequestPanel.jsx'
 import CustomerInfoPanel from '../componenets/customerInfoPanel.jsx'
 import TotalEarningPanel from '../componenets/totalEarningPanel.jsx'
@@ -103,13 +103,25 @@ const CaptainHome = () => {
 
   useEffect(() => {
     if (otpVerificationStatus === 'success') {
+      const activeRideMeta = {
+        rideId: incomingRideRequest?.rideId || null,
+        origin: incomingRideRequest?.origin || '',
+        destination: incomingRideRequest?.destination || '',
+        pickupCoordinates: incomingRideRequest?.pickupCoordinates || null,
+        destinationCoordinates: incomingRideRequest?.destinationCoordinates || null,
+        fare: incomingRideRequest?.fare ?? null,
+      }
+
+      if (activeRideMeta.rideId) {
+        localStorage.setItem('activeCaptainRideId', String(activeRideMeta.rideId))
+        localStorage.setItem('activeCaptainRideMeta', JSON.stringify(activeRideMeta))
+      }
+
       navigate('/captain-ride', {
-        state: {
-          rideId: incomingRideRequest?.rideId || null,
-        },
+        state: activeRideMeta,
       })
     }
-  }, [incomingRideRequest?.rideId, navigate, otpVerificationStatus])
+  }, [incomingRideRequest, navigate, otpVerificationStatus])
 
   useEffect(() => {
     const captainId = captainData?._id
@@ -230,10 +242,22 @@ const CaptainHome = () => {
       return
     }
 
+    const activeRideMeta = {
+      rideId: incomingRideRequest?.rideId || null,
+      origin: incomingRideRequest?.origin || '',
+      destination: incomingRideRequest?.destination || '',
+      pickupCoordinates: incomingRideRequest?.pickupCoordinates || null,
+      destinationCoordinates: incomingRideRequest?.destinationCoordinates || null,
+      fare: incomingRideRequest?.fare ?? null,
+    }
+
+    if (activeRideMeta.rideId) {
+      localStorage.setItem('activeCaptainRideId', String(activeRideMeta.rideId))
+      localStorage.setItem('activeCaptainRideMeta', JSON.stringify(activeRideMeta))
+    }
+
     navigate('/captain-ride', {
-      state: {
-        rideId: incomingRideRequest?.rideId || null,
-      },
+      state: activeRideMeta,
     })
   }
 
@@ -257,8 +281,16 @@ const CaptainHome = () => {
         </div>
       ) : null}
 
-      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${mapImage})` }} />
-      <div className="absolute inset-0 bg-linear-to-b from-white/10 via-transparent to-white/20" />
+      <div className="absolute inset-0 z-0">
+        <LiveTracking 
+          captainLocation={captainData?.location}
+          pickupCoords={incomingRideRequest?.pickupCoordinates || null}
+          destinationCoords={incomingRideRequest?.destinationCoordinates || null}
+          pickupString={incomingRideRequest?.origin}
+          destString={incomingRideRequest?.destination}
+        />
+      </div>
+      <div className="absolute inset-0 bg-linear-to-b from-white/10 via-transparent to-white/20 pointer-events-none z-10" />
 
       <Link
         to="/captain-logout"

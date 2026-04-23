@@ -3,7 +3,7 @@ import axios from 'axios'
 import { FaCarSide, FaMotorcycle, FaTaxi } from 'react-icons/fa'
 import { IoArrowBack, IoCardOutline } from 'react-icons/io5'
 
-const VehicleTypePanel = ({ pickupLocation, destination, onBack, onSelectVehicle }) => {
+const VehicleTypePanel = ({ pickupLocation, destination, pickupCoords, destinationCoords, onBack, onSelectVehicle }) => {
   const [selectedVehicle, setSelectedVehicle] = useState('car')
   const [fareByVehicle, setFareByVehicle] = useState({ car: null, auto: null, bike: null })
   const [isFareLoading, setIsFareLoading] = useState(false)
@@ -25,6 +25,10 @@ const VehicleTypePanel = ({ pickupLocation, destination, onBack, onSelectVehicle
           params: {
             pickup: pickupLocation,
             destination,
+            pickupLat: pickupCoords?.lat,
+            pickupLng: pickupCoords?.lng,
+            destLat: destinationCoords?.lat,
+            destLng: destinationCoords?.lng,
           },
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         })
@@ -52,7 +56,7 @@ const VehicleTypePanel = ({ pickupLocation, destination, onBack, onSelectVehicle
     return () => {
       isCancelled = true
     }
-  }, [pickupLocation, destination])
+  }, [pickupLocation, destination, pickupCoords, destinationCoords])
 
   const vehicleOptions = useMemo(() => ([
     {
@@ -121,7 +125,6 @@ const VehicleTypePanel = ({ pickupLocation, destination, onBack, onSelectVehicle
               type="button"
               onClick={() => {
                 setSelectedVehicle(option.id)
-                onSelectVehicle?.(option)
               }}
               className={`flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition ${
                 selectedVehicle === option.id
@@ -152,7 +155,7 @@ const VehicleTypePanel = ({ pickupLocation, destination, onBack, onSelectVehicle
               </div>
 
               <p className="text-[1.35rem] font-semibold text-black">
-                {option.fare !== null ? `Rs ${option.fare}` : '--'}
+                {option.fare !== null ? `Rs ${option.fare}` : 'Fare unavailable'}
               </p>
             </button>
           ))}
@@ -171,8 +174,9 @@ const VehicleTypePanel = ({ pickupLocation, destination, onBack, onSelectVehicle
             type="button"
             onClick={() => selectedOption && onSelectVehicle?.({
               ...selectedOption,
-              fare: selectedOption.fare !== null ? `Rs ${selectedOption.fare}` : '--',
+              fare: selectedOption.fare,
             })}
+            disabled={!selectedOption || selectedOption.fare === null || isFareLoading}
             className="h-12 flex-1 rounded-xl bg-black text-[1.25rem] font-semibold text-white"
           >
             Choose {selectedOption?.title || 'Ride'}

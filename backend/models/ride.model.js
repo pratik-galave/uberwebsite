@@ -1,5 +1,14 @@
 import mongoose from "mongoose";
 
+const coordinateSchema = new mongoose.Schema({
+    lat: {
+        type: Number,
+    },
+    lng: {
+        type: Number,
+    },
+}, { _id: false });
+
 const rideSchema = new mongoose.Schema({
     origin: {
         type: String,
@@ -8,6 +17,14 @@ const rideSchema = new mongoose.Schema({
     destination: {
         type: String,
         required: true
+    },
+    pickupCoordinates: {
+        type: coordinateSchema,
+        default: undefined,
+    },
+    destinationCoordinates: {
+        type: coordinateSchema,
+        default: undefined,
     },
     user: {
         type: mongoose.Schema.Types.ObjectId,

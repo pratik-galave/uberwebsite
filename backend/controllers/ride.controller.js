@@ -6,6 +6,21 @@ import userModel from '../models/user.model.js';
 import rideModel from '../models/ride.model.js';
 import captainModel from '../models/captain.model.js';
 
+const normalizeCoordinates = (value) => {
+    if (!value || typeof value !== 'object') {
+        return null;
+    }
+
+    const lat = Number(value.lat);
+    const lng = Number(value.lng ?? value.lon);
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+        return null;
+    }
+
+    return { lat, lng };
+};
+
 export async function createRide(req, res) {
     try {
         const errors = validationResult(req);
@@ -13,41 +28,62 @@ export async function createRide(req, res) {
             return res.status(400).json({ errors: errors.array() });
         }
 
-        const { origin, destination, vehicleType, fare } = req.body;
+        const { origin, destination, vehicleType, fare, pickupLat, pickupLng, destLat, destLng } = req.body;
         const userId = req.user?._id ? String(req.user._id) : req.body?.userId;
+
+        const parsedPickupLat = Number(pickupLat);
+        const parsedPickupLng = Number(pickupLng);
+        const parsedDestLat = Number(destLat);
+        const parsedDestLng = Number(destLng);
+
+        const pickupCoordinates = Number.isFinite(parsedPickupLat) && Number.isFinite(parsedPickupLng)
+            ? { lat: parsedPickupLat, lng: parsedPickupLng }
+            : null;
+
+        const destinationCoordinates = Number.isFinite(parsedDestLat) && Number.isFinite(parsedDestLng)
+            ? { lat: parsedDestLat, lng: parsedDestLng }
+            : null;
 
         if (!userId) {
             return res.status(401).json({ error: 'User not authenticated' });
         }
 
-        const ride = await createRideService({ origin, destination, userId, vehicleType, fare });
+        const ride = await createRideService({
+            origin,
+            destination,
+            userId,
+            vehicleType,
+            fare,
+            pickupCoordinates,
+            destinationCoordinates,
+        });
         res.status(201).json(ride);
 
         try {
             const user = await userModel.findById(userId).select('fullname email');
 
-            const captainRidePayload = {
-                rideId: ride?._id,
-                origin: ride?.origin,
-                destination: ride?.destination,
-                fare: ride?.fare,
-                vehicleType,
-                user: user
-                    ? {
-                        _id: user._id,
-                        fullname: user.fullname,
-                        email: user.email,
-                    }
-                    : {
-                        _id: userId,
-                    },
-            };
-
             let captainsInRadius = [];
+            let resolvedPickupCoordinates = normalizeCoordinates(ride?.pickupCoordinates)
+                || normalizeCoordinates(pickupCoordinates);
+            let resolvedDestinationCoordinates = normalizeCoordinates(ride?.destinationCoordinates)
+                || normalizeCoordinates(destinationCoordinates);
 
             try {
-                const pickupcoordinates = await getAddressCoordinates(origin);
-                captainsInRadius = await getCaptainInRadius(pickupcoordinates.lat, pickupcoordinates.lng, 10000); // 10 km radius in meters
+                if (!resolvedPickupCoordinates) {
+                    resolvedPickupCoordinates = await getAddressCoordinates(origin);
+                }
+
+                if (!resolvedDestinationCoordinates) {
+                    try {
+                        resolvedDestinationCoordinates = await getAddressCoordinates(destination);
+                    } catch {
+                        resolvedDestinationCoordinates = null;
+                    }
+                }
+
+                if (resolvedPickupCoordinates) {
+                    captainsInRadius = await getCaptainInRadius(resolvedPickupCoordinates.lat, resolvedPickupCoordinates.lng, 10000); // 10 km radius in meters
+                }
             } catch (locationError) {
                 console.error('Failed to resolve captain radius, falling back to online captains:', locationError.message);
             }
@@ -71,6 +107,25 @@ export async function createRide(req, res) {
             const nearbyCaptainNames = captainsInRadius
                 .map((captain) => [captain?.fullname?.firstname, captain?.fullname?.lastname].filter(Boolean).join(' ').trim())
                 .filter(Boolean);
+
+            const captainRidePayload = {
+                rideId: ride?._id,
+                origin: ride?.origin,
+                destination: ride?.destination,
+                pickupCoordinates: normalizeCoordinates(resolvedPickupCoordinates),
+                destinationCoordinates: normalizeCoordinates(resolvedDestinationCoordinates),
+                fare: ride?.fare,
+                vehicleType,
+                user: user
+                    ? {
+                        _id: user._id,
+                        fullname: user.fullname,
+                        email: user.email,
+                    }
+                    : {
+                        _id: userId,
+                    },
+            };
 
             sendMessageToRoom(userId, {
                 rideId: ride?._id,
@@ -101,8 +156,8 @@ export async function getFare(req, res) {
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
-        const { pickup, destination } = req.query;
-        const fare = await getfare(pickup, destination);
+        const { pickup, destination, pickupLat, pickupLng, destLat, destLng } = req.query;
+        const fare = await getfare(pickup, destination, pickupLat, pickupLng, destLat, destLng);
         res.json(fare);
     } catch (error) {
         console.error('Error fetching fare:', error.message);

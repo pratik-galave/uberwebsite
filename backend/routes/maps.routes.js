@@ -7,12 +7,12 @@ import { query } from 'express-validator';
 
 router.get('/get-coordinates', [
     query('address').notEmpty().withMessage('Address query parameter is required')
-], authMiddleware.authUser, mapsController.getCoordinates);
+], authMiddleware.authAny, mapsController.getCoordinates);
 
 router.get('/get-distance-time', [
     query('origin').notEmpty().withMessage('Origin query parameter is required'),
     query('destination').notEmpty().withMessage('Destination query parameter is required')
-], authMiddleware.authUser, mapsController.getDistance);
+], authMiddleware.authAny, mapsController.getDistance);
 
 router.get('/get-suggestions', mapsController.getSuggestions);
 

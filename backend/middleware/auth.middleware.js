@@ -51,10 +51,45 @@ export async function authCaptain(req, res, next) {
     }
 }
 
+export async function authAny(req, res, next) {
+    const authHeader = req.headers.authorization;
+    const token = req.cookies?.token || authHeader?.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ error: 'Access denied. No token provided.' });
+    }
+
+    const isBlacklistedToken = await blacklistTokenModel.findOne({ token: token });
+    if (isBlacklistedToken) {
+        return res.status(401).json({ error: 'Token has been blacklisted. Please log in again.' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        const user = await userModel.findById(decoded._id);
+        if (user) {
+            req.user = user;
+            return next();
+        }
+
+        const captain = await captainModel.findById(decoded._id);
+        if (captain) {
+            req.captain = captain;
+            return next();
+        }
+
+        return res.status(401).json({ error: 'User or captain not found' });
+    } catch (error) {
+        return res.status(400).json({ error: 'Invalid token.' });
+    }
+}
+
 
 const authMiddleware = {
     authUser,
-    authCaptain 
+    authCaptain,
+    authAny,
 };
 
 export default authMiddleware;

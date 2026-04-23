@@ -12,6 +12,7 @@ import UserLogout from './pages/UserLogout.jsx'
 import CaptainRestrictedWrapper from './pages/CaptainRestrictedWrapper.jsx'
 import CaptainLogout from './pages/CaptainLogout.jsx'
 import CaptainRideNavigation from './pages/CaptainRideNavigation.jsx'
+import UserPayment from './pages/UserPayment.jsx'
 
 const App = () => {
   return (
@@ -50,6 +51,11 @@ const App = () => {
       <Route path="/user-ride" element={
         <UserRestrictedWrapper>
           <CaptainRideNavigation/>
+        </UserRestrictedWrapper>
+      }/>
+      <Route path="/payment" element={
+        <UserRestrictedWrapper>
+          <UserPayment/>
         </UserRestrictedWrapper>
       }/>
     </Routes>

@@ -1,60 +1,156 @@
-import  axios from 'axios';
+import axios from 'axios';
 import dotenv from 'dotenv';
 import captainModel from '../models/captain.model.js';
 
 dotenv.config();
 
-export const getAddressCoordinates = async (address) => {
-	if (!address || typeof address !== 'string' || !address.trim()) {
-		throw new Error('Address is required');
-	}
+// Simple in-memory cache for Nominatim to prevent 429 Too Many Requests
+const nominatimCache = new Map();
+const osrmCache = new Map();
+const CACHE_TTL_MS = 3600000;
 
-	const apiKey = process.env.GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAP_API_KEY;
+const getCachedData = (cache, cacheKey) => {
+    if (!cache.has(cacheKey)) {
+        return null;
+    }
 
-	if (!apiKey) {
-		throw new Error('Google Maps API key is not configured');
-	}
+    const cached = cache.get(cacheKey);
+    if (Date.now() - cached.timestamp >= CACHE_TTL_MS) {
+        cache.delete(cacheKey);
+        return null;
+    }
 
-	const response = await axios.get('https://maps.googleapis.com/maps/api/geocode/json', {
-		params: {
-			address: address.trim(),
-			key: apiKey,
-		},
-	});
-
-	if (response.data.status !== 'OK' || !response.data.results?.length) {
-		throw new Error('Unable to fetch coordinates for the provided address');
-	}
-
-	const { lat, lng } = response.data.results[0].geometry.location;
-
-	return { lat, lng };
+    return cached.data;
 };
-    
+
+const setCachedData = (cache, cacheKey, data) => {
+    cache.set(cacheKey, { timestamp: Date.now(), data });
+};
+
+const normalizeCoordinates = (value) => {
+    if (!value || typeof value !== 'object') {
+        return null;
+    }
+
+    const lat = Number(value.lat);
+    const lng = Number(value.lng ?? value.lon);
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+        return null;
+    }
+
+    return { lat, lng };
+};
+
+const fetchFromNominatim = async (url, params = {}) => {
+    const cacheKey = `${url}?${new URLSearchParams(params).toString()}`;
+
+    const cachedData = getCachedData(nominatimCache, cacheKey);
+    if (cachedData) {
+        return cachedData;
+    }
+
+    try {
+        const response = await axios.get(url, {
+            params: {
+                ...params,
+                format: 'json',
+            },
+            headers: {
+                // Nominatim strictly prefers a valid User-Agent
+                'User-Agent': 'uber-app/1.0 (local-dev)',
+            },
+            timeout: 5000,
+        });
+
+        setCachedData(nominatimCache, cacheKey, response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Nominatim request failed:', error.message);
+        throw error;
+    }
+};
+
+const fetchFromOsrm = async (originCoords, destinationCoords) => {
+    const profile = 'driving';
+    const osrmUrl = `https://router.project-osrm.org/route/v1/${profile}/${originCoords.lng},${originCoords.lat};${destinationCoords.lng},${destinationCoords.lat}?overview=false`;
+    const cacheKey = `${originCoords.lat},${originCoords.lng}->${destinationCoords.lat},${destinationCoords.lng}`;
+
+    const cachedData = getCachedData(osrmCache, cacheKey);
+    if (cachedData) {
+        return cachedData;
+    }
+
+    const response = await axios.get(osrmUrl, { timeout: 5000 });
+    setCachedData(osrmCache, cacheKey, response.data);
+    return response.data;
+};
+
+export const getAddressCoordinates = async (address) => {
+    if (!address || typeof address !== 'string' || !address.trim()) {
+        throw new Error('Address is required');
+    }
+
+    try {
+        const places = await fetchFromNominatim('https://nominatim.openstreetmap.org/search', {
+            q: address.trim(),
+            limit: 1,
+        });
+
+        if (!places || places.length === 0) {
+            throw new Error('Unable to fetch coordinates for the provided address');
+        }
+
+        return {
+            lat: parseFloat(places[0].lat),
+            lng: parseFloat(places[0].lon)
+        };
+    } catch (error) {
+        throw new Error('Unable to fetch coordinates for the provided address');
+    }
+};
+
 export const getDistanceAndTime = async (origin, destination) => {
     if (!origin || !destination) {
         throw new Error('Origin and destination are required');
     }
-    const apiKey = process.env.GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAP_API_KEY;
 
-    if (!apiKey) {
-        throw new Error('Google Maps API key is not configured');
-    }
-    const url=`https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(origin)}&destinations=${encodeURIComponent(destination)}&key=${apiKey}`;
-    
     try {
-        const response = await axios.get(url);  
-        if (response.data.status !== 'OK') {
-            throw new Error('Unable to fetch distance and time for the provided origin and destination');
+        // First we need coordinates for origin and destination since OSRM requires them
+        let originCoords = null;
+        let destCoords = null;
+
+        originCoords = normalizeCoordinates(origin);
+        if (!originCoords) {
+            originCoords = await getAddressCoordinates(origin);
         }
-        else{
-            if (!response.data.rows?.length || !response.data.rows[0].elements?.length) {
-                throw new Error('No distance and time data available for the provided origin and destination');
+
+        destCoords = normalizeCoordinates(destination);
+        if (!destCoords) {
+            destCoords = await getAddressCoordinates(destination);
+        }
+
+        const response = { data: await fetchFromOsrm(originCoords, destCoords) };
+        
+        if (response.data.code !== 'Ok' || !response.data.routes || response.data.routes.length === 0) {
+            throw new Error('No route found');
+        }
+
+        const route = response.data.routes[0];
+        
+        return {
+            distance: {
+                value: route.distance, // in meters
+                text: `${(route.distance / 1000).toFixed(1)} km`,
+            },
+            duration: {
+                value: route.duration, // in seconds 
+                text: `${Math.round(route.duration / 60)} mins`,
             }
-            return response.data.rows[0].elements[0];
-        }
+        };
+
     } catch (error) {
-        console.error('Error fetching distance and time:', error.message);
+        console.error('Error fetching distance and time from OSRM:', error.message);
         throw new Error('Failed to fetch distance and time');
     }
 }
@@ -63,87 +159,28 @@ export const getSuggestions = async (input) => {
     if(!input || typeof input !== 'string' || !input.trim()) {
         throw new Error('Input is required for suggestions');
     }
-    const apiKey = process.env.GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAP_API_KEY;
-
-    if (!apiKey) {
-        throw new Error('Google Maps API key is not configured');
-    }
     const normalizedInput = input.trim();
-    const placesUrl = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(normalizedInput)}&key=${apiKey}`;
-    const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(normalizedInput)}&key=${apiKey}`;
 
     try {
-        const response = await axios.get(placesUrl);
-        if (response.data.status === 'ZERO_RESULTS') {
+        const places = await fetchFromNominatim('https://nominatim.openstreetmap.org/search', {
+            q: normalizedInput,
+            addressdetails: 1,
+            limit: 5,
+        });
+
+        if (!places || places.length === 0) {
             return [];
         }
 
-        if (response.data.status !== 'OK') {
-            throw new Error(response.data.status || 'Unable to fetch suggestions for the provided input');
-        }
-        return response.data.predictions;
-    } catch (error) {
-        console.error('Places autocomplete failed, trying geocode fallback:', error.message);
-
-        try {
-            const geocodeResponse = await axios.get(geocodeUrl);
-
-            if (geocodeResponse.data.status === 'ZERO_RESULTS') {
-                return [];
-            }
-
-            if (geocodeResponse.data.status !== 'OK') {
-                throw new Error(geocodeResponse.data.status || 'Geocode fallback request failed');
-            }
-
-            const results = Array.isArray(geocodeResponse.data.results)
-                ? geocodeResponse.data.results
-                : [];
-
-            return results.slice(0, 5).map((result) => ({
-                description: result.formatted_address,
-                place_id: result.place_id,
-            }));
-        } catch (fallbackError) {
-            console.error('Geocode fallback failed:', fallbackError.message);
-
-            try {
-                const nominatimResponse = await axios.get('https://nominatim.openstreetmap.org/search', {
-                    params: {
-                        q: normalizedInput,
-                        format: 'json',
-                        addressdetails: 1,
-                        limit: 5,
-                    },
-                    headers: {
-                        'User-Agent': 'uber-app/1.0 (local-dev)',
-                    },
-                    timeout: 5000,
-                });
-
-                const places = Array.isArray(nominatimResponse.data) ? nominatimResponse.data : [];
-
-                if (!places.length) {
-                    return [
-                        { description: normalizedInput },
-                        { description: `${normalizedInput}, Pune` },
-                        { description: `${normalizedInput}, Maharashtra` },
-                    ];
-                }
-
-                return places.map((item) => ({
-                    description: item.display_name,
-                    place_id: item.place_id ? String(item.place_id) : undefined,
-                })).filter((item) => Boolean(item.description));
-            } catch (osmError) {
-                console.error('Nominatim fallback failed:', osmError.message);
-                return [
-                    { description: normalizedInput },
-                    { description: `${normalizedInput}, Pune` },
-                    { description: `${normalizedInput}, Maharashtra` },
-                ];
-            }
-        }
+        return places.map((item) => ({
+            description: item.display_name,
+            place_id: item.place_id ? String(item.place_id) : undefined,
+            lat: parseFloat(item.lat),
+            lng: parseFloat(item.lon)
+        })).filter((item) => Boolean(item.description));
+    } catch (osmError) {
+        console.error('Nominatim failed:', osmError.message);
+        return [];
     }
 }
 

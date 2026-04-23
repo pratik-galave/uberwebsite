@@ -1,7 +1,6 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { IoArrowBackOutline, IoNavigate } from 'react-icons/io5'
-import RideDirectionsPanel from '../componenets/rideDirectionsPanel.jsx'
 import { SocketDataContext } from '../context/socketDataContext.js'
 import { CaptainDataContext } from '../context/captainDataContext.js'
 import LiveTracking from '../componenets/liveTracking.jsx'
@@ -15,21 +14,46 @@ const CaptainRideNavigation = () => {
   const { captainData } = useContext(CaptainDataContext)
   const isCaptainView = location.pathname === '/captain-ride'
 
-  const rideId = isCaptainView
-    ? (location.state?.rideId || localStorage.getItem('activeCaptainRideId') || null)
-    : (location.state?.rideId || localStorage.getItem('activeUserRideId') || null)
+  const storedRideMeta = useMemo(() => {
+    const storageKey = isCaptainView ? 'activeCaptainRideMeta' : 'activeUserRideMeta'
+    const storedValue = localStorage.getItem(storageKey)
+
+    if (!storedValue) {
+      return null
+    }
+
+    try {
+      return JSON.parse(storedValue)
+    } catch {
+      return null
+    }
+  }, [isCaptainView])
+
+  const rideMeta = useMemo(() => {
+    const stateMeta = location.state && typeof location.state === 'object' ? location.state : {}
+    const storageRideId = isCaptainView ? localStorage.getItem('activeCaptainRideId') : localStorage.getItem('activeUserRideId')
+
+    return {
+      rideId: stateMeta.rideId || storedRideMeta?.rideId || storageRideId || null,
+      origin: stateMeta.origin || storedRideMeta?.origin || '',
+      destination: stateMeta.destination || storedRideMeta?.destination || '',
+      pickupCoordinates: stateMeta.pickupCoordinates || storedRideMeta?.pickupCoordinates || null,
+      destinationCoordinates: stateMeta.destinationCoordinates || storedRideMeta?.destinationCoordinates || null,
+      fare: stateMeta.fare ?? storedRideMeta?.fare ?? null,
+    }
+  }, [isCaptainView, location.state, storedRideMeta])
+
+  const rideId = rideMeta.rideId
 
   useEffect(() => {
-    if (location.state?.rideId && isCaptainView) {
-      localStorage.setItem('activeCaptainRideId', String(location.state.rideId))
-    }
-  }, [isCaptainView, location.state?.rideId])
+    const idKey = isCaptainView ? 'activeCaptainRideId' : 'activeUserRideId'
+    const metaKey = isCaptainView ? 'activeCaptainRideMeta' : 'activeUserRideMeta'
 
-  useEffect(() => {
-    if (location.state?.rideId && !isCaptainView) {
-      localStorage.setItem('activeUserRideId', String(location.state.rideId))
+    if (rideMeta.rideId) {
+      localStorage.setItem(idKey, String(rideMeta.rideId))
+      localStorage.setItem(metaKey, JSON.stringify(rideMeta))
     }
-  }, [isCaptainView, location.state?.rideId])
+  }, [isCaptainView, rideMeta])
 
   useEffect(() => {
     if (isCaptainView) {
@@ -116,14 +140,31 @@ const CaptainRideNavigation = () => {
     }
 
     localStorage.removeItem('activeCaptainRideId')
+    localStorage.removeItem('activeCaptainRideMeta')
 
     navigate('/captain-home')
+  }
+
+  const handleUserDropOff = () => {
+    if (isCaptainView) {
+      return
+    }
+
+    navigate('/payment', {
+      state: rideMeta,
+    })
   }
 
   return (
     <main className="relative h-screen w-full overflow-hidden bg-neutral-100 text-black">
       <div className="absolute inset-0">
-        <LiveTracking captainLocation={captainLocation} />
+        <LiveTracking
+          captainLocation={captainLocation}
+          pickupCoords={rideMeta.pickupCoordinates}
+          destinationCoords={rideMeta.destinationCoordinates}
+          pickupString={rideMeta.origin}
+          destString={rideMeta.destination}
+        />
       </div>
       <div className="absolute inset-0 bg-white/20" />
 
@@ -148,7 +189,6 @@ const CaptainRideNavigation = () => {
         </div>
       </header>
 
-      {isCaptainView ? (
       <div className="absolute inset-x-0 bottom-0 z-20 rounded-t-3xl bg-white px-4 pb-5 pt-4 shadow-[0_-12px_30px_rgba(0,0,0,0.24)]">
         <div className="mx-auto mb-3 h-1.5 w-14 rounded-full bg-neutral-300" />
 
@@ -159,31 +199,33 @@ const CaptainRideNavigation = () => {
 
           <div className="min-w-0 flex-1">
             <p className="text-sm text-neutral-400">Pick up at</p>
-            <p className="text-[1.7rem] font-semibold leading-tight text-black">7958 Swift Village</p>
-            <p className="mt-1 text-base text-neutral-500">5 min away · 2.2 km</p>
+            <p className="text-[1.7rem] font-semibold leading-tight text-black">{rideMeta.origin || 'Pickup location'}</p>
+            <p className="mt-1 text-base text-neutral-500">
+              {rideMeta.destination ? `Drop at ${rideMeta.destination}` : 'Destination not available'}
+            </p>
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={handleStartRide}
-          className="mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-black text-lg font-semibold text-white transition hover:bg-neutral-800"
-        >
-          <IoNavigate className="h-5 w-5" />
-          Start Ride
-        </button>
+        {isCaptainView ? (
+          <button
+            type="button"
+            onClick={isRideStarted ? handleRideCompleted : handleStartRide}
+            className="mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-black text-lg font-semibold text-white transition hover:bg-neutral-800"
+          >
+            <IoNavigate className="h-5 w-5" />
+            {isRideStarted ? 'Drop Off' : 'Start Ride'}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleUserDropOff}
+            className="mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-black text-lg font-semibold text-white transition hover:bg-neutral-800"
+          >
+            <IoNavigate className="h-5 w-5" />
+            Drop Off
+          </button>
+        )}
       </div>
-      ) : null}
-
-      {isCaptainView && isRideStarted ? (
-        <RideDirectionsPanel
-          pickup="7958 Swift Village"
-          est="5 min"
-          distance="2.2 km"
-          fare="$25.00"
-          onDropOff={handleRideCompleted}
-        />
-      ) : null}
     </main>
   )
 }

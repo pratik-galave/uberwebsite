@@ -3,7 +3,7 @@ import gsap from 'gsap'
 import axios from 'axios'
 import { IoChevronDown } from 'react-icons/io5'
 import { useNavigate } from 'react-router-dom'
-import mapImage from '../assets/map.jpg'
+import InteractiveMap from '../componenets/InteractiveMap.jsx'
 import LocationSearchPanel from '../componenets/locationSearchPanel.jsx'
 import ConfirmRidePanel from '../componenets/confirmRidePanel.jsx'
 import VehicleFindingPanel from '../componenets/vehicleFindingPanel.jsx'
@@ -21,6 +21,8 @@ const Home = () => {
   const [isDriverDetailsPanelOpen, setIsDriverDetailsPanelOpen] = useState(false)
   const [pickupLocation, setPickupLocation] = useState('')
   const [destination, setDestination] = useState('')
+  const [pickupCoords, setPickupCoords] = useState(null)
+  const [destinationCoords, setDestinationCoords] = useState(null)
   const [locationSuggestions, setLocationSuggestions] = useState([])
   const [isSuggestionLoading, setIsSuggestionLoading] = useState(false)
   const [isCreatingRide, setIsCreatingRide] = useState(false)
@@ -93,13 +95,18 @@ const Home = () => {
         captainId: payload.captainId,
         otp: payload.otp,
         captainName: payload.captainName || 'Your captain',
+        origin: payload.origin || pickupLocation,
+        destination: payload.destination || destination,
+        pickupCoordinates: payload.pickupCoordinates || pickupCoords || null,
+        destinationCoordinates: payload.destinationCoordinates || destinationCoords || null,
+        fare: payload.fare ?? null,
       })
 
       console.log('Ride accepted, share OTP with captain:', payload)
     })
 
     return () => unsubscribeRideAccepted()
-  }, [receiveMessageFromEvent])
+  }, [destination, destinationCoords, pickupCoords, pickupLocation, receiveMessageFromEvent])
 
   useEffect(() => {
     const unsubscribeOtpVerificationRequested = receiveMessageFromEvent('otpVerificationRequested', (payload) => {
@@ -120,10 +127,20 @@ const Home = () => {
 
       if (isValid) {
         localStorage.setItem('activeUserRideId', String(payload.rideId))
+
+        const activeRideMeta = {
+          rideId: String(payload.rideId),
+          origin: rideOtpInfo?.origin || pickupLocation.trim(),
+          destination: rideOtpInfo?.destination || destination.trim(),
+          pickupCoordinates: rideOtpInfo?.pickupCoordinates || pickupCoords || null,
+          destinationCoordinates: rideOtpInfo?.destinationCoordinates || destinationCoords || null,
+          fare: rideOtpInfo?.fare ?? selectedVehicle?.fare ?? null,
+        }
+
+        localStorage.setItem('activeUserRideMeta', JSON.stringify(activeRideMeta))
+
         navigate('/user-ride', {
-          state: {
-            rideId: payload.rideId,
-          },
+          state: activeRideMeta,
         })
       }
 
@@ -135,7 +152,7 @@ const Home = () => {
     })
 
     return () => unsubscribeOtpVerificationRequested()
-  }, [navigate, receiveMessageFromEvent, rideOtpInfo, sendMessageToEvent])
+  }, [destination, destinationCoords, navigate, pickupCoords, pickupLocation, receiveMessageFromEvent, rideOtpInfo, selectedVehicle, sendMessageToEvent])
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -368,7 +385,7 @@ const Home = () => {
 
         if (!isCancelled) {
           const suggestions = Array.isArray(response.data)
-            ? response.data.map((item) => item.description).filter(Boolean)
+            ? response.data
             : []
 
           setLocationSuggestions(suggestions)
@@ -442,13 +459,19 @@ const Home = () => {
         throw new Error('Unable to find user id from profile')
       }
 
-      const parsedFare = Number(String(selectedVehicle.fare || '').replace(/[^0-9.]/g, ''))
+      const parsedFare = Number.isFinite(selectedVehicle.fare)
+        ? Number(selectedVehicle.fare)
+        : Number(String(selectedVehicle.fare || '').replace(/[^0-9.]/g, ''))
 
       await axios.post(
         `${baseUrl}/ride/create`,
         {
           origin: pickupLocation.trim(),
           destination: destination.trim(),
+          pickupLat: pickupCoords?.lat,
+          pickupLng: pickupCoords?.lng,
+          destLat: destinationCoords?.lat,
+          destLng: destinationCoords?.lng,
           userId,
           vehicleType: selectedVehicle.id,
           fare: Number.isFinite(parsedFare) ? parsedFare : undefined,
@@ -474,9 +497,44 @@ const Home = () => {
     setIsDriverDetailsPanelOpen(true)
   }
 
-  const handleLocationSelection = (selectedAddress) => {
+  const resolveAddressCoordinates = async (address) => {
+    const normalizedAddress = String(address || '').trim()
+    if (!normalizedAddress) {
+      return null
+    }
+
+    const token = localStorage.getItem('token')
+    const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3000'
+
+    try {
+      const response = await axios.get(`${baseUrl}/maps/get-coordinates`, {
+        params: { address: normalizedAddress },
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      })
+
+      const lat = Number(response.data?.lat)
+      const lng = Number(response.data?.lng)
+
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+        return null
+      }
+
+      return { lat, lng }
+    } catch {
+      return null
+    }
+  }
+
+  const handleLocationSelection = async (selectedItem) => {
+    const address = typeof selectedItem === 'string' ? selectedItem : selectedItem?.description
+    const lat = Number(selectedItem?.lat)
+    const lng = Number(selectedItem?.lng)
+    const directCoords = Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : null
+    const coords = directCoords || await resolveAddressCoordinates(address)
+
     if (activeField === 'pickup') {
-      setPickupLocation(selectedAddress)
+      setPickupLocation(address)
+      if (coords) setPickupCoords(coords)
       setLocationSuggestions([])
       setActiveField('destination')
       window.requestAnimationFrame(() => {
@@ -485,17 +543,53 @@ const Home = () => {
       return
     }
 
-    setDestination(selectedAddress)
+    setDestination(address)
+    if (coords) setDestinationCoords(coords)
     setLocationSuggestions([])
   }
+
+  const handlePickupChange = async (coords) => {
+     setPickupCoords(coords);
+     try {
+         const res = await axios.get(`https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lng}&format=json`);
+         if(res.data && res.data.display_name) {
+             setPickupLocation(res.data.display_name);
+         }
+     } catch(e) {}
+  };
+
+  const handleDestinationChange = async (coords) => {
+     setDestinationCoords(coords);
+     try {
+         const res = await axios.get(`https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lng}&format=json`);
+         if(res.data && res.data.display_name) {
+             setDestination(res.data.display_name);
+         }
+     } catch(e) {}
+  };
 
   const handleProceedToVehicleSelection = () => {
     if (!pickupLocation.trim() || !destination.trim()) {
       return
     }
 
-    setIsPanelOpen(false)
-    setIsVehiclePanelOpen(true)
+    const proceed = async () => {
+      const pickupToSet = pickupCoords || await resolveAddressCoordinates(pickupLocation)
+      const destinationToSet = destinationCoords || await resolveAddressCoordinates(destination)
+
+      if (pickupToSet) {
+        setPickupCoords(pickupToSet)
+      }
+
+      if (destinationToSet) {
+        setDestinationCoords(destinationToSet)
+      }
+
+      setIsPanelOpen(false)
+      setIsVehiclePanelOpen(true)
+    }
+
+    proceed()
   }
 
   const inputBaseClasses =
@@ -528,20 +622,26 @@ const Home = () => {
       ) : null}
 
       <div ref={landingRef} className="absolute inset-0">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${mapImage})` }}
-        />
-        <div className="absolute inset-0 bg-linear-to-b from-white/15 via-white/5 to-white/20" />
+        <div className="absolute inset-0 z-0">
+          <InteractiveMap 
+             pickupCoords={pickupCoords} 
+             destinationCoords={destinationCoords}
+             pickupString={pickupLocation}
+             destinationString={destination}
+             onPickupChange={handlePickupChange}
+             onDestinationChange={handleDestinationChange}
+          />
+        </div>
+        <div className="absolute inset-0 bg-linear-to-b from-white/15 via-white/5 to-white/20 pointer-events-none z-10" />
 
         
 
         
-        <div className="absolute inset-x-0 bottom-0 px-4 pb-4">
+        <div className="absolute inset-x-0 bottom-0 px-4 pb-4 z-20 pointer-events-none">
           <button
             type="button"
             onClick={openPanel}
-            className="w-full rounded-3xl bg-white/95 px-5 py-5 text-left shadow-[0_18px_50px_rgba(0,0,0,0.16)] backdrop-blur-md"
+            className="w-full rounded-3xl bg-white/95 px-5 py-5 text-left shadow-[0_18px_50px_rgba(0,0,0,0.16)] backdrop-blur-md pointer-events-auto"
           >
             <h1 className="text-4xl font-semibold tracking-tight">Find a trip</h1>
 
@@ -653,6 +753,8 @@ const Home = () => {
         <VehicleTypePanel
           pickupLocation={pickupLocation}
           destination={destination}
+          pickupCoords={pickupCoords}
+          destinationCoords={destinationCoords}
           onBack={handleBackToLocationPanel}
           onSelectVehicle={handleVehicleSelect}
         />
@@ -667,7 +769,7 @@ const Home = () => {
           pickupLocation={pickupLocation}
           destination={destination}
           vehicleName={selectedVehicle?.title}
-          fare={selectedVehicle?.fare}
+          fare={selectedVehicle?.fare != null ? `Rs ${selectedVehicle.fare}` : null}
           isSubmitting={isCreatingRide}
           errorMessage={createRideError}
           onConfirm={handleConfirmRide}
@@ -688,7 +790,7 @@ const Home = () => {
           pickupLocation={pickupLocation}
           destination={destination}
           vehicleName={selectedVehicle?.title}
-          fare={selectedVehicle?.fare}
+          fare={selectedVehicle?.fare != null ? `Rs ${selectedVehicle.fare}` : null}
           onFoundDriver={handleFoundDriver}
           onClose={() => setIsFindingPanelOpen(false)}
         />

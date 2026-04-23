@@ -15,22 +15,25 @@ const LocationSearchPanel = ({ suggestions = [], isLoading = false, onSelectLoca
           <p className="py-4 text-base font-medium text-neutral-600">Start typing to see location suggestions.</p>
         ) : null}
 
-        {suggestions.map((address) => (
-          <button
-            key={address}
-            type="button"
-            onClick={() => onSelectLocation?.(address)}
-            className="flex w-full items-start gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-3 py-3 text-left transition hover:border-neutral-300 hover:bg-neutral-100"
-          >
-            <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-neutral-700 shadow-sm">
-              <IoLocationOutline className="h-4.5 w-4.5" />
-            </div>
+        {suggestions.map((item, index) => {
+          const address = typeof item === 'string' ? item : item.description;
+          return (
+            <button
+              key={index}
+              type="button"
+              onClick={() => onSelectLocation?.(item)}
+              className="flex w-full items-start gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-3 py-3 text-left transition hover:border-neutral-300 hover:bg-neutral-100"
+            >
+              <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-neutral-700 shadow-sm">
+                <IoLocationOutline className="h-4.5 w-4.5" />
+              </div>
 
-            <div className="min-w-0">
-              <p className="text-base font-semibold leading-snug tracking-tight text-black">{address}</p>
-            </div>
-          </button>
-        ))}
+              <div className="min-w-0">
+                <p className="text-base font-semibold leading-snug tracking-tight text-black">{address}</p>
+              </div>
+            </button>
+          )
+        })}
       </div>
     </div>
   )

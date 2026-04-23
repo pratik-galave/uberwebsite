@@ -78,7 +78,7 @@ const ConfirmRidePanel = ({
           <div className="mt-4 flex items-center justify-between rounded-[1.35rem] border border-neutral-200 bg-neutral-50 px-4 py-3">
             <div>
               <p className="text-sm text-neutral-500">Estimated fare</p>
-              <p className="text-[1.35rem] font-semibold text-black">{fare || '$21.91'}</p>
+              <p className="text-[1.35rem] font-semibold text-black">{fare != null && fare !== '' ? fare : 'Fare unavailable'}</p>
             </div>
           </div>
 
