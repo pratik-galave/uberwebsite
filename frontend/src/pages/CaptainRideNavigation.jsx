@@ -10,6 +10,24 @@ const CaptainRideNavigation = () => {
   const location = useLocation()
   const [isRideStarted, setIsRideStarted] = useState(false)
   const [captainLocation, setCaptainLocation] = useState(null)
+  const [isPanelOpen, setIsPanelOpen] = useState(true)
+  const [touchStartY, setTouchStartY] = useState(0)
+
+  const handleTouchStart = (e) => setTouchStartY(e.touches[0].clientY)
+
+  const handleTouchMove = (e) => {
+    const touchY = e.touches[0].clientY
+    if (touchY - touchStartY > 30) {
+      // Swiped down
+      setIsPanelOpen(false)
+    } else if (touchStartY - touchY > 30) {
+      // Swiped up
+      setIsPanelOpen(true)
+    }
+  }
+
+  const togglePanel = () => setIsPanelOpen((prev) => !prev)
+
   const { sendMessageToEvent, receiveMessageFromEvent } = useContext(SocketDataContext)
   const { captainData } = useContext(CaptainDataContext)
   const isCaptainView = location.pathname === '/captain-ride'
@@ -139,6 +157,18 @@ const CaptainRideNavigation = () => {
       })
     }
 
+    // Update captain stats
+    try {
+      const statsStr = localStorage.getItem('captainStats')
+      const stats = statsStr ? JSON.parse(statsStr) : { earnings: 0, rides: 0, onlineSeconds: 0 }
+      const newFare = Number(rideMeta?.fare) || 120 // Fallback to 120 if fare not available
+      stats.earnings += newFare
+      stats.rides += 1
+      localStorage.setItem('captainStats', JSON.stringify(stats))
+    } catch (err) {
+      console.error('Failed to update stats on ride completion:', err)
+    }
+
     localStorage.removeItem('activeCaptainRideId')
     localStorage.removeItem('activeCaptainRideMeta')
 
@@ -189,20 +219,29 @@ const CaptainRideNavigation = () => {
         </div>
       </header>
 
-      <div className="absolute inset-x-0 bottom-0 z-20 rounded-t-3xl bg-white px-4 pb-5 pt-4 shadow-[0_-12px_30px_rgba(0,0,0,0.24)]">
-        <div className="mx-auto mb-3 h-1.5 w-14 rounded-full bg-neutral-300" />
+      <div className="absolute inset-x-0 bottom-0 z-20 rounded-t-3xl bg-white px-4 pt-4 pb-5 shadow-[0_-12px_30px_rgba(0,0,0,0.24)] transition-all duration-300">
+        <div
+          className="flex w-full cursor-pointer justify-center pb-3 -mt-2 pt-2"
+          onClick={togglePanel}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+        >
+          <div className="h-1.5 w-14 rounded-full bg-neutral-300" />
+        </div>
 
-        <div className="flex items-start gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-400 text-sm font-semibold text-black">
-            A
-          </div>
+        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isPanelOpen ? 'max-h-48 opacity-100 mb-4' : 'max-h-0 opacity-0'}`}>
+          <div className="flex items-start gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-400 text-sm font-semibold text-black">
+              A
+            </div>
 
-          <div className="min-w-0 flex-1">
-            <p className="text-sm text-neutral-400">Pick up at</p>
-            <p className="text-[1.7rem] font-semibold leading-tight text-black">{rideMeta.origin || 'Pickup location'}</p>
-            <p className="mt-1 text-base text-neutral-500">
-              {rideMeta.destination ? `Drop at ${rideMeta.destination}` : 'Destination not available'}
-            </p>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm text-neutral-400">Pick up at</p>
+              <p className="text-[1.7rem] font-semibold leading-tight text-black">{rideMeta.origin || 'Pickup location'}</p>
+              <p className="mt-1 text-base text-neutral-500">
+                {rideMeta.destination ? `Drop at ${rideMeta.destination}` : 'Destination not available'}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -210,7 +249,7 @@ const CaptainRideNavigation = () => {
           <button
             type="button"
             onClick={isRideStarted ? handleRideCompleted : handleStartRide}
-            className="mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-black text-lg font-semibold text-white transition hover:bg-neutral-800"
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-black text-lg font-semibold text-white transition hover:bg-neutral-800"
           >
             <IoNavigate className="h-5 w-5" />
             {isRideStarted ? 'Drop Off' : 'Start Ride'}
@@ -219,7 +258,7 @@ const CaptainRideNavigation = () => {
           <button
             type="button"
             onClick={handleUserDropOff}
-            className="mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-black text-lg font-semibold text-white transition hover:bg-neutral-800"
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-black text-lg font-semibold text-white transition hover:bg-neutral-800"
           >
             <IoNavigate className="h-5 w-5" />
             Drop Off

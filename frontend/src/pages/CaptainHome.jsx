@@ -16,6 +16,39 @@ const CaptainHome = () => {
   const [, setRideRequestQueue] = useState([])
   const [enteredOtp, setEnteredOtp] = useState('')
   const [otpVerificationStatus, setOtpVerificationStatus] = useState('idle')
+  const [currentLocation, setCurrentLocation] = useState(null)
+  
+  // Add state for captain statistics
+  const [captainStats, setCaptainStats] = useState(() => {
+    const stored = localStorage.getItem('captainStats')
+    if (stored) {
+      try { 
+        return JSON.parse(stored) 
+      } catch (error) {
+        console.error('Failed to parse captain stats:', error)
+      }
+    }
+    return { earnings: 0, rides: 0, onlineSeconds: 0 } // Start at 0 instead of dummy data
+  })
+
+  // Timer to increment online time every minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCaptainStats(prev => {
+        const next = { ...prev, onlineSeconds: prev.onlineSeconds + 60 }
+        localStorage.setItem('captainStats', JSON.stringify(next))
+        return next
+      })
+    }, 60000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const formatTime = (totalSeconds) => {
+    const hours = Math.floor(totalSeconds / 3600)
+    const minutes = Math.floor((totalSeconds % 3600) / 60)
+    return `${hours}h ${minutes}m`
+  }
+
   const [locationWarning, setLocationWarning] = useState(() => {
     if (!window.isSecureContext) {
       return 'Location sharing requires HTTPS. Open this page on a secure origin to enable live updates.'
@@ -151,6 +184,8 @@ const CaptainHome = () => {
             longitude,
           })
 
+          setCurrentLocation({ latitude, longitude })
+
           sendMessageToEvent('updateLocationCaptain', {
             userType: 'captain',
             userId: captainId,
@@ -283,7 +318,7 @@ const CaptainHome = () => {
 
       <div className="absolute inset-0 z-0">
         <LiveTracking 
-          captainLocation={captainData?.location}
+          captainLocation={currentLocation || captainData?.location}
           pickupCoords={incomingRideRequest?.pickupCoordinates || null}
           destinationCoords={incomingRideRequest?.destinationCoordinates || null}
           pickupString={incomingRideRequest?.origin}
@@ -304,10 +339,11 @@ const CaptainHome = () => {
       {!isRequestPanelOpen && !isCustomerInfoPanelOpen ? (
         <div className="absolute inset-x-0 bottom-0 z-30">
           <TotalEarningPanel
-            totalEarning="Rs 4,250"
-            changeLabel="+12% from last week"
-            completedRides="18 rides"
-            onlineHours="7h 20m"
+            totalEarning={`Rs ${Math.floor(captainStats.earnings).toLocaleString('en-IN')}`}
+            changeLabel="+0% from last week"
+            completedRides={`${captainStats.rides} rides`}
+            onlineHours={formatTime(captainStats.onlineSeconds)}
+            captainName={[captainData?.fullname?.firstname, captainData?.fullname?.lastname].filter(Boolean).join(' ') || 'Captain'}
           />
         </div>
       ) : null}
