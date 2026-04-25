@@ -1,82 +1,67 @@
 import React from 'react'
 
-const CustomerRequestPanel = ({ customerName, fare, distance, pickup, dropoff, onAccept, onIgnore }) => {
+const CustomerRequestPanel = ({ pickupLocation, destination, fare, passengerName, onAccept, onIgnore }) => {
   return (
-    <section className="absolute inset-x-0 bottom-0 z-40 rounded-t-3xl bg-surface-variant/40 border border-outline/20 shadow-[0_-20px_40px_rgba(0,0,0,0.6)] backdrop-blur-[40px] overflow-hidden">
-      {/* Subtle top edge highlight */}
-      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-      
-      {/* Pulsing alert bar */}
-      <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-[#00E676] to-transparent animate-pulse shadow-[0_0_15px_#00E676]"></div>
-      
-      <div className="px-container-margin pb-6 pt-6">
-        <div className="flex items-start justify-between gap-3 border-b border-outline/10 pb-4">
-          <div className="flex gap-3 items-center">
-            <div className="h-12 w-12 shrink-0 rounded-full bg-gradient-to-br from-[#00E676]/20 to-surface-variant border border-[#00E676]/30 flex items-center justify-center text-[#00E676] shadow-[0_0_15px_rgba(0,230,118,0.15)] relative">
-              <span className="material-symbols-outlined text-[24px]">person</span>
-              <div className="absolute -right-1 -bottom-1 h-4 w-4 bg-[#00E676] rounded-full border-2 border-background animate-pulse"></div>
-            </div>
-            <div>
-              <p className="font-label-caps text-[10px] uppercase tracking-widest text-[#00E676] mb-0.5">Incoming Request</p>
-              <p className="font-display-sm text-[22px] leading-none tracking-tight text-on-surface">{customerName}</p>
-            </div>
-          </div>
+    <div className="rounded-t-2xl bg-surface-container-lowest border-t border-outline-variant/20 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+      <div className="flex justify-center pt-3 pb-1">
+        <div className="h-1 w-10 rounded-full bg-outline-variant/30" />
+      </div>
 
-          <div className="text-right flex flex-col items-end justify-center">
-            <p className="font-display-md text-[28px] leading-none font-bold text-primary-container tracking-tighter">{fare}</p>
-            <div className="flex items-center gap-1 text-on-surface-variant mt-1 bg-surface-container-lowest/60 px-2 py-0.5 rounded border border-outline/10">
-              <span className="material-symbols-outlined text-[12px]">route</span>
-              <p className="font-body-sm text-[12px]">{distance}</p>
-            </div>
+      <div className="px-6 py-3">
+        <div className="flex items-center gap-2 mb-1">
+          <div className="h-2.5 w-2.5 rounded-full bg-primary-container animate-pulse" />
+          <p className="text-xs font-bold uppercase tracking-widest text-primary">New Request</p>
+        </div>
+        <h2 className="font-display text-xl font-extrabold tracking-tight text-on-surface">Incoming Ride</h2>
+      </div>
+
+      {/* Passenger & Fare */}
+      <div className="mx-6 flex items-center justify-between rounded-lg bg-surface-container-low border border-outline-variant/15 p-4 mb-4">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-full bg-surface-container border border-outline-variant/20 flex items-center justify-center">
+            <span className="material-symbols-outlined text-xl text-on-surface-variant">person</span>
+          </div>
+          <p className="text-sm font-bold text-on-surface">{passengerName || 'Passenger'}</p>
+        </div>
+        <p className="text-2xl font-extrabold font-display text-on-surface">{fare || '—'}</p>
+      </div>
+
+      {/* Route */}
+      <div className="mx-6 rounded-lg border border-outline-variant/15 overflow-hidden mb-4">
+        <div className="flex items-start gap-3 p-4 border-b border-outline-variant/10">
+          <div className="h-3 w-3 mt-0.5 rounded-full bg-primary-container border-2 border-primary shrink-0" />
+          <div className="min-w-0">
+            <p className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-0.5">Pickup</p>
+            <p className="text-sm text-on-surface truncate">{pickupLocation || 'Pickup location'}</p>
           </div>
         </div>
-
-        <div className="mt-stack-md flex flex-col gap-3 relative rounded-2xl bg-surface-container-lowest/40 border border-outline/10 p-4">
-          {/* Connecting line */}
-          <div className="absolute left-[35px] top-[40px] bottom-[40px] w-[2px] bg-outline/20 z-0 border-l border-dashed border-outline/50"></div>
-          
-          <div className="relative z-10 flex items-start gap-4">
-            <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-variant/50 text-primary-container border border-outline/10 shadow-[0_0_10px_rgba(255,255,255,0.02)]">
-              <span className="material-symbols-outlined text-[18px]">radio_button_checked</span>
-            </div>
-            <div className="min-w-0 flex-1 border-b border-outline/10 pb-3">
-              <p className="font-display-xs text-[16px] leading-tight text-on-surface tracking-wide truncate">{pickup || 'Pickup location'}</p>
-              <p className="mt-0.5 font-body-sm text-[12px] text-on-surface-variant/70 uppercase font-label-caps">Pick-up point</p>
-            </div>
+        <div className="flex items-start gap-3 p-4">
+          <div className="h-3 w-3 mt-0.5 rounded-sm bg-on-surface shrink-0" />
+          <div className="min-w-0">
+            <p className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-0.5">Drop-off</p>
+            <p className="text-sm text-on-surface truncate">{destination || 'Destination'}</p>
           </div>
-
-          <div className="relative z-10 flex items-start gap-4">
-            <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-variant/50 text-[#00B8D4] border border-outline/10 shadow-[0_0_10px_rgba(255,255,255,0.02)]">
-              <span className="material-symbols-outlined text-[18px]">location_on</span>
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="font-display-xs text-[16px] leading-tight text-on-surface tracking-wide truncate">{dropoff || 'Destination'}</p>
-              <p className="mt-0.5 font-body-sm text-[12px] text-on-surface-variant/70 uppercase font-label-caps">Drop-off point</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3 mt-stack-lg">
-          <button
-            type="button"
-            onClick={onIgnore}
-            className="h-14 w-[100px] rounded-xl border border-outline/20 bg-surface-container-lowest/60 text-on-surface font-label-caps text-[12px] uppercase tracking-widest transition hover:bg-surface-variant/40 flex flex-col items-center justify-center gap-1"
-          >
-            <span className="material-symbols-outlined text-[20px]">close</span>
-            Ignore
-          </button>
-
-          <button
-            type="button"
-            onClick={onAccept}
-            className="flex h-14 flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#00E676] to-[#00C853] text-background font-label-caps text-[14px] uppercase tracking-widest shadow-[0_0_20px_rgba(0,230,118,0.3)] transition-all hover:shadow-[0_0_25px_rgba(0,230,118,0.5)] font-bold"
-          >
-            Accept Mission
-            <span className="material-symbols-outlined text-[20px]">check_circle</span>
-          </button>
         </div>
       </div>
-    </section>
+
+      <div className="px-6 pb-6 flex gap-3">
+        <button
+          type="button"
+          onClick={onIgnore}
+          className="flex-1 rounded-lg border border-outline-variant/30 bg-surface py-3.5 text-sm font-bold text-on-surface uppercase tracking-wider hover:bg-surface-container-low transition-colors"
+        >
+          Ignore
+        </button>
+        <button
+          type="button"
+          onClick={onAccept}
+          className="flex-[2] flex items-center justify-center gap-2 rounded-lg bg-primary-container text-on-primary-container py-3.5 text-sm font-bold uppercase tracking-wider hover:brightness-95 transition-all"
+        >
+          Accept Ride
+          <span className="material-symbols-outlined text-lg">check</span>
+        </button>
+      </div>
+    </div>
   )
 }
 

@@ -10,16 +10,10 @@ const UserPayment = () => {
   const rideMeta = useMemo(() => {
     const stateMeta = location.state && typeof location.state === 'object' ? location.state : {}
     const storedValue = localStorage.getItem('activeUserRideMeta')
-
     let storedMeta = {}
     if (storedValue) {
-      try {
-        storedMeta = JSON.parse(storedValue)
-      } catch {
-        storedMeta = {}
-      }
+      try { storedMeta = JSON.parse(storedValue) } catch { storedMeta = {} }
     }
-
     return {
       rideId: stateMeta.rideId || storedMeta.rideId || localStorage.getItem('activeUserRideId') || null,
       fare: stateMeta.fare ?? storedMeta.fare ?? null,
@@ -28,27 +22,22 @@ const UserPayment = () => {
 
   const fareDisplay = rideMeta.fare != null ? `₹${rideMeta.fare}` : 'Fare pending'
 
-  const handleMakePayment = () => {
-    setIsPaymentDone(true)
-  }
+  const handleMakePayment = () => setIsPaymentDone(true)
 
   const handleDone = () => {
-    if (!isPaymentDone) {
-      return
-    }
-
+    if (!isPaymentDone) return
     localStorage.removeItem('activeUserRideId')
     localStorage.removeItem('activeUserRideMeta')
     navigate('/home', { replace: true })
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-background text-on-background antialiased">
-      {/* Abstract Background Gradients */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary-container/10 blur-[120px] rounded-full pointer-events-none"></div>
-      <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-on-tertiary-container/5 blur-[150px] rounded-full pointer-events-none"></div>
+    <main className="fixed inset-0 w-full overflow-hidden bg-background text-on-surface flex flex-col justify-end">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
+           style={{ backgroundImage: 'radial-gradient(#1a1b22 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
 
-      <div className="relative mx-auto flex min-h-screen w-full max-w-md items-end">
+      <div className="relative w-full max-w-md mx-auto">
         <MakePaymentPanel
           customerName="You"
           fare={fareDisplay}

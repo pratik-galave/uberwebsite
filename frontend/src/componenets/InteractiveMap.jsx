@@ -228,7 +228,7 @@ const InteractiveMap = ({
                     ref={destRef}
                 />
             ) : null}
-            {path.length > 0 ? <Polyline positions={path} color="#3b82f6" weight={5} opacity={0.8} /> : null}
+            {path.length > 0 ? <Polyline positions={path} color="#00FFC2" weight={8} opacity={1} lineCap="square" /> : null}
             <FitBounds
                 path={path}
                 pickupCoords={effectivePickupCoords}

@@ -1,160 +1,109 @@
-import React, { useContext, useState } from 'react'
+import React, { useState, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { CaptainDataContext } from '../context/captainDataContext.js'
 
 const CaptainLogin = () => {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
   const { setCaptainData } = useContext(CaptainDataContext)
 
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [errorMessage, setErrorMessage] = useState('')
-
-  const normalizeCaptainData = (captain) => ({
-    _id: captain?._id ?? '',
-    email: captain?.email ?? '',
-    firstname: captain?.fullname?.firstname ?? '',
-    lastname: captain?.fullname?.lastname ?? '',
-    vehicleColor: captain?.vehicle?.color ?? '',
-    vehiclePlate: captain?.vehicle?.vehiclePlate ?? '',
-    vehicleCapacity: captain?.vehicle?.capacity?.toString?.() ?? '',
-    vehicleType: captain?.vehicle?.vehicleType ?? '',
-  })
-
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setErrorMessage('')
-
-    const data = { email: email.trim(), password }
-    const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:4000'
-
+    setError('')
+    setIsLoading(true)
     try {
-      const loginResponse = await axios.post(`${baseUrl}/captain/login`, data)
-
-      if (loginResponse.status === 200) {
-        const token = loginResponse.data.token
-        if (token) {
-          localStorage.setItem('captainToken', token)
-        }
-
-        const profileResponse = await axios.get(`${baseUrl}/captain/profile`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-
-        const captain = profileResponse?.data?.captain
-        const normalizedCaptain = normalizeCaptainData(captain)
-        setCaptainData(normalizedCaptain)
-        localStorage.setItem('captainData', JSON.stringify(normalizedCaptain))
-
-        navigate('/captain-home')
+      const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3000'
+      const response = await axios.post(`${baseUrl}/captain/login`, { email, password })
+      if (response.data?.token) {
+        localStorage.setItem('token', response.data.token)
       }
-
-      setEmail('')
-      setPassword('')
-    } catch (error) {
-      const validationMessage = error?.response?.data?.errors?.[0]?.msg
-      const apiMessage = error?.response?.data?.error
-      setErrorMessage(validationMessage || apiMessage || 'Captain login failed. Please try again.')
+      if (response.data?.captain) {
+        setCaptainData(response.data.captain)
+      }
+      navigate('/captain-home')
+    } catch (err) {
+      setError(err?.response?.data?.message || err?.response?.data?.error || 'Login failed.')
+    } finally {
+      setIsLoading(false)
     }
   }
 
   return (
-    <div className="bg-background text-on-background min-h-screen flex items-center justify-center relative overflow-hidden antialiased">
-      {/* Abstract Background Gradients */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-secondary-fixed/10 blur-[120px] rounded-full pointer-events-none"></div>
-      <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-on-tertiary-container/5 blur-[150px] rounded-full pointer-events-none"></div>
-      
-      {/* Main Content Container */}
-      <main className="w-full max-w-[420px] px-container-margin z-10 flex flex-col gap-4">
-        {/* Glassmorphic Login Card */}
-        <div className="bg-surface-variant/40 backdrop-blur-[40px] border border-outline/20 rounded-xl p-stack-lg shadow-[0_20px_40px_rgba(0,0,0,0.4)] relative overflow-hidden flex-1 flex flex-col justify-between">
-          {/* Subtle top edge highlight */}
-          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-secondary-fixed/20 to-transparent"></div>
-          
-          {/* Brand Header */}
-          <div className="text-center mb-stack-lg">
-            <h1 className="font-display-xl text-display-xl text-secondary-fixed tracking-tighter mb-stack-sm">CAPTAIN</h1>
-            <p className="font-body-md text-body-md text-on-surface-variant">Sign in to your fleet account</p>
+    <main className="relative flex min-h-screen flex-col bg-background text-on-surface overflow-auto">
+      <nav className="flex items-center justify-between px-8 py-5 border-b border-outline-variant/30">
+        <Link to="/" className="text-2xl font-extrabold tracking-tight font-display">
+          Velocity<span className="text-primary">.</span>
+        </Link>
+        <Link to="/login" className="flex items-center gap-2 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors">
+          <span className="material-symbols-outlined text-lg">person</span>
+          Rider Login
+        </Link>
+      </nav>
+
+      <section className="flex-1 flex items-center justify-center px-6 py-12">
+        <div className="w-full max-w-md">
+          <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-primary-container/20 border border-primary-container/40 px-3 py-1">
+            <span className="material-symbols-outlined text-sm text-primary">local_taxi</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-primary">Captain Portal</span>
           </div>
-          
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="flex flex-col gap-stack-md">
-            {/* Email Input */}
-            <div className="flex flex-col gap-stack-sm">
-              <label className="font-label-caps text-label-caps text-on-surface-variant pl-1 uppercase" htmlFor="email">Email</label>
-              <div className="relative flex items-center">
-                <span className="material-symbols-outlined absolute left-4 text-on-surface-variant/70 text-[20px] pointer-events-none">person</span>
-                <input 
-                  id="email" 
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-surface-container-lowest/60 border border-outline/30 rounded-lg pl-12 pr-4 py-3 text-on-surface font-body-md text-body-md focus:border-secondary-fixed focus:outline-none focus:ring-1 focus:ring-secondary-fixed transition-colors placeholder:text-on-surface-variant/40" 
-                  placeholder="Enter your email" 
-                  required
-                />
-              </div>
+
+          <h1 className="mt-4 font-display text-4xl font-black tracking-tight text-on-surface">
+            Captain Sign In
+          </h1>
+          <p className="mt-2 text-sm text-on-surface-variant">Access your fleet command dashboard</p>
+
+          {error && (
+            <div className="mt-6 rounded-md border border-error/30 bg-error-container px-4 py-3">
+              <p className="text-sm font-medium text-on-error-container">{error}</p>
             </div>
-            
-            {/* Password Input */}
-            <div className="flex flex-col gap-stack-sm">
-              <div className="flex justify-between items-center pl-1">
-                <label className="font-label-caps text-label-caps text-on-surface-variant uppercase" htmlFor="password">Password</label>
-              </div>
-              <div className="relative flex items-center">
-                <span className="material-symbols-outlined absolute left-4 text-on-surface-variant/70 text-[20px] pointer-events-none">lock</span>
-                <input 
-                  id="password" 
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-surface-container-lowest/60 border border-outline/30 rounded-lg pl-12 pr-4 py-3 text-on-surface font-body-md text-body-md focus:border-secondary-fixed focus:outline-none focus:ring-1 focus:ring-secondary-fixed transition-colors placeholder:text-on-surface-variant/40" 
-                  placeholder="Enter your password" 
-                  required
-                />
-              </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="captain@velocity.com"
+                className="w-full rounded-md border border-outline-variant bg-surface-container-lowest px-4 py-3 text-base text-on-surface placeholder:text-outline outline-none focus:border-primary focus:ring-2 focus:ring-primary-container transition-all"
+              />
             </div>
 
-            {errorMessage ? (
-              <p className="rounded-lg bg-error-container/20 border border-error-container px-3 py-2 text-sm text-error">
-                {errorMessage}
-              </p>
-            ) : null}
-            
-            {/* Login Button */}
-            <button 
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="••••••••"
+                className="w-full rounded-md border border-outline-variant bg-surface-container-lowest px-4 py-3 text-base text-on-surface placeholder:text-outline outline-none focus:border-primary focus:ring-2 focus:ring-primary-container transition-all"
+              />
+            </div>
+
+            <button
               type="submit"
-              className="w-full mt-stack-sm bg-gradient-to-r from-secondary-fixed to-[#00B8D4] text-on-primary-fixed font-label-caps text-label-caps py-4 rounded-lg shadow-[0_0_20px_rgba(98,255,150,0.25)] hover:shadow-[0_0_25px_rgba(98,255,150,0.4)] transition-all active:scale-[0.98] uppercase tracking-widest flex justify-center items-center gap-2"
+              disabled={isLoading}
+              className="w-full flex items-center justify-center gap-2 rounded-md bg-on-surface text-surface py-3.5 text-sm font-bold uppercase tracking-wider hover:bg-on-surface/90 disabled:opacity-50 transition-all"
             >
-              Login as Captain
-              <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+              {isLoading ? 'Signing in...' : 'Access Dashboard'}
+              {!isLoading && <span className="material-symbols-outlined text-lg">arrow_forward</span>}
             </button>
           </form>
-          
-          {/* Footer Link */}
-          <div className="text-center mt-stack-lg">
-            <p className="font-body-md text-body-md text-on-surface-variant">
-              Join a fleet?{' '}
-              <Link to="/captain-signup" className="text-secondary-fixed font-medium hover:text-secondary-fixed-dim transition-colors">Register as a Captain</Link>
-            </p>
-          </div>
-        </div>
 
-        {/* User Login Link */}
-        <div className="bg-surface-variant/40 backdrop-blur-[40px] border border-outline/20 rounded-xl p-4 shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
-          <Link
-            to="/login"
-            className="w-full flex items-center justify-center gap-2 bg-surface-container-lowest/40 border border-outline/20 py-3 rounded-lg text-primary-container font-body-md text-body-md hover:bg-surface-container-lowest transition-colors backdrop-blur-md"
-          >
-            <span className="material-symbols-outlined">person</span>
-            Sign in as User
-          </Link>
+          <p className="mt-6 text-center text-sm text-on-surface-variant">
+            New captain?{' '}
+            <Link to="/captain-signup" className="font-bold text-primary hover:underline">Register here</Link>
+          </p>
         </div>
-      </main>
-    </div>
+      </section>
+    </main>
   )
 }
 
