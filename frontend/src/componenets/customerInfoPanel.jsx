@@ -1,7 +1,7 @@
 import React, { useContext, useRef, useState } from 'react'
 import { SocketDataContext } from '../context/socketDataContext.js'
 
-const CustomerInfoPanel = ({ rideId, captainId, passengerName, pickupLocation, destination, fare, onStartRide, onClose }) => {
+const CustomerInfoPanel = ({ rideId, captainId, userId, passengerName, pickupLocation, destination, fare, onStartRide, onClose }) => {
   const [otpValues, setOtpValues] = useState(['', '', '', '', '', ''])
   const [otpStatus, setOtpStatus] = useState('idle') // idle | verifying | verified | error
   const [otpError, setOtpError] = useState('')
@@ -41,9 +41,9 @@ const CustomerInfoPanel = ({ rideId, captainId, passengerName, pickupLocation, d
     if (otp.length !== 6) { setOtpError('Please enter the full 6-digit code'); return }
 
     setOtpStatus('verifying')
-    sendMessageToEvent('otpVerificationRequested', { rideId, captainId, enteredOtp: otp })
+    sendMessageToEvent('verifyOtpWithUser', { rideId, userId, captainId, enteredOtp: otp })
 
-    const unsubscribe = receiveMessageFromEvent('otpVerificationResult', (payload) => {
+    const unsubscribe = receiveMessageFromEvent('otpVerificationResultForCaptain', (payload) => {
       if (String(payload?.rideId) !== String(rideId)) return
       unsubscribe()
       if (payload.isValid) {

@@ -6,9 +6,7 @@ const Start = () => {
     <main className="relative flex min-h-screen flex-col bg-background text-on-surface overflow-auto">
       {/* Navigation */}
       <nav className="flex items-center justify-between px-8 py-5 border-b border-outline-variant/30">
-        <span className="text-2xl font-extrabold tracking-tight font-display">
-          Velocity<span className="text-primary">.</span>
-        </span>
+        <img src="/velocity_logo_v2.png" alt="Velocity" className="h-20" />
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-on-surface-variant">
           <a href="#" className="hover:text-on-surface transition-colors">Product</a>
           <a href="#" className="hover:text-on-surface transition-colors">Safety</a>

@@ -1,13 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  /* ═══════════════════════════════════════════════
-     VELOCITY LIGHT — Design System Tokens
-     From Stitch Project: LuxeDrive Premium Interface
-     Design System: Velocity Light (Modern Brutalism)
-     ═══════════════════════════════════════════════ */
 
-  /* ── Color Palette ── */
   --color-background: #fbf8ff;
   --color-on-background: #1a1b22;
   --color-surface: #fbf8ff;

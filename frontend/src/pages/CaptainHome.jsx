@@ -13,8 +13,6 @@ const CaptainHome = () => {
   const [isCustomerInfoPanelOpen, setIsCustomerInfoPanelOpen] = useState(false)
   const [incomingRideRequest, setIncomingRideRequest] = useState(null)
   const [, setRideRequestQueue] = useState([])
-  const [enteredOtp, setEnteredOtp] = useState('')
-  const [otpVerificationStatus, setOtpVerificationStatus] = useState('idle')
   const [currentLocation, setCurrentLocation] = useState(null)
   
   const [captainStats, setCaptainStats] = useState(() => {
@@ -85,8 +83,6 @@ const CaptainHome = () => {
       if (previousQueue.length === 0) return previousQueue
       const [nextRequest, ...remainingRequests] = previousQueue
       setIncomingRideRequest(nextRequest)
-      setEnteredOtp('')
-      setOtpVerificationStatus('idle')
       setIsRequestPanelOpen(true)
       return remainingRequests
     })
@@ -102,8 +98,6 @@ const CaptainHome = () => {
         if (isDuplicateInQueue || isDuplicateCurrentRide) return previousQueue
         if (!incomingRideRequest && !isCustomerInfoPanelOpen) {
           setIncomingRideRequest(payload)
-          setEnteredOtp('')
-          setOtpVerificationStatus('idle')
           setIsRequestPanelOpen(true)
           return previousQueue
         }
@@ -119,31 +113,7 @@ const CaptainHome = () => {
     sendMessageToEvent('join', { userType: 'captain', userId: captainId })
   }, [captainData, sendMessageToEvent])
 
-  useEffect(() => {
-    const unsubscribeOtpResult = receiveMessageFromEvent('otpVerificationResultForCaptain', (payload) => {
-      if (!payload?.rideId || payload.rideId !== incomingRideRequest?.rideId) return
-      setOtpVerificationStatus(payload?.isValid ? 'success' : 'failed')
-    })
-    return () => unsubscribeOtpResult()
-  }, [incomingRideRequest?.rideId, receiveMessageFromEvent])
 
-  useEffect(() => {
-    if (otpVerificationStatus === 'success') {
-      const activeRideMeta = {
-        rideId: incomingRideRequest?.rideId || null,
-        origin: incomingRideRequest?.origin || '',
-        destination: incomingRideRequest?.destination || '',
-        pickupCoordinates: incomingRideRequest?.pickupCoordinates || null,
-        destinationCoordinates: incomingRideRequest?.destinationCoordinates || null,
-        fare: incomingRideRequest?.fare ?? null,
-      }
-      if (activeRideMeta.rideId) {
-        localStorage.setItem('activeCaptainRideId', String(activeRideMeta.rideId))
-        localStorage.setItem('activeCaptainRideMeta', JSON.stringify(activeRideMeta))
-      }
-      navigate('/captain-ride', { state: activeRideMeta })
-    }
-  }, [incomingRideRequest, navigate, otpVerificationStatus])
 
   useEffect(() => {
     const captainId = captainData?._id
@@ -191,33 +161,16 @@ const CaptainHome = () => {
     }
     setIsRequestPanelOpen(false)
     setIncomingRideRequest(null)
-    setEnteredOtp('')
-    setOtpVerificationStatus('idle')
     openNextQueuedRideRequest()
   }
 
   const handleCloseCustomerInfo = () => {
     setIsCustomerInfoPanelOpen(false)
     setIncomingRideRequest(null)
-    setEnteredOtp('')
-    setOtpVerificationStatus('idle')
     openNextQueuedRideRequest()
   }
 
-  const handleVerifyOtp = () => {
-    const cleanedOtp = enteredOtp.trim()
-    if (!incomingRideRequest?.rideId || !incomingRideRequest?.user?._id || cleanedOtp.length !== 6) return
-    setOtpVerificationStatus('pending')
-    sendMessageToEvent('verifyOtpWithUser', {
-      rideId: incomingRideRequest.rideId,
-      userId: incomingRideRequest.user._id,
-      captainId: captainData?._id,
-      enteredOtp: cleanedOtp,
-    })
-  }
-
   const handleConfirmRide = () => {
-    if (otpVerificationStatus !== 'success') return
     const activeRideMeta = {
       rideId: incomingRideRequest?.rideId || null,
       origin: incomingRideRequest?.origin || '',
@@ -265,11 +218,9 @@ const CaptainHome = () => {
       </div>
       
       {/* Top Bar */}
-      <div className="absolute top-6 left-6 z-20">
-        <div className="rounded-lg bg-surface-container-lowest/95 border border-outline-variant/20 px-4 py-2 shadow-sm backdrop-blur-sm">
-          <span className="text-lg font-extrabold tracking-tight font-display">Velocity<span className="text-primary">.</span></span>
-          <span className="text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-2">Captain</span>
-        </div>
+      <div className="absolute top-6 left-6 z-20 flex items-center gap-3">
+        <img src="/velocity_logo_v2.png" alt="Velocity" className="h-14" />
+        <span className="rounded-full bg-surface-container-lowest/90 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-primary border border-outline-variant/20 shadow-sm backdrop-blur-sm">Captain</span>
       </div>
 
       <Link
@@ -311,6 +262,7 @@ const CaptainHome = () => {
           <CustomerInfoPanel
             rideId={incomingRideRequest?.rideId}
             captainId={captainData?._id}
+            userId={incomingRideRequest?.user?._id}
             passengerName={requestCustomerName}
             fare={requestFare}
             pickupLocation={requestPickup}

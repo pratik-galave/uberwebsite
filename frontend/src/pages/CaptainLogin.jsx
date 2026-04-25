@@ -35,8 +35,8 @@ const CaptainLogin = () => {
   return (
     <main className="relative flex min-h-screen flex-col bg-background text-on-surface overflow-auto">
       <nav className="flex items-center justify-between px-8 py-5 border-b border-outline-variant/30">
-        <Link to="/" className="text-2xl font-extrabold tracking-tight font-display">
-          Velocity<span className="text-primary">.</span>
+        <Link to="/">
+          <img src="/velocity_logo_v2.png" alt="Velocity" className="h-16" />
         </Link>
         <Link to="/login" className="flex items-center gap-2 text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors">
           <span className="material-symbols-outlined text-lg">person</span>

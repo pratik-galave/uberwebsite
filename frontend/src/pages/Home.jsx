@@ -304,9 +304,7 @@ const Home = () => {
 
       {/* Logo */}
       <div className="absolute top-6 left-6 z-20">
-        <div className="rounded-lg bg-surface-container-lowest/95 border border-outline-variant/20 px-4 py-2 shadow-sm backdrop-blur-sm">
-          <span className="text-lg font-extrabold tracking-tight font-display">Velocity<span className="text-primary">.</span></span>
-        </div>
+        <img src="/velocity_logo_v2.png" alt="Velocity" className="h-14" />
       </div>
 
       {/* Search Card */}
