@@ -37,7 +37,7 @@ const UserLogin = () => {
       {/* Navigation */}
       <nav className="flex items-center justify-between px-8 py-5 border-b border-outline-variant/30">
         <Link to="/" >
-          <img src="/velocity_logo_v2.png" alt="Velocity" className="h-16" />
+          <img src="/velocity_logo.png" alt="Velocity" className="h-8" />
         </Link>
         <Link
           to="/captain-login"

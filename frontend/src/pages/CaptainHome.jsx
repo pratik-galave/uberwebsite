@@ -14,12 +14,12 @@ const CaptainHome = () => {
   const [incomingRideRequest, setIncomingRideRequest] = useState(null)
   const [, setRideRequestQueue] = useState([])
   const [currentLocation, setCurrentLocation] = useState(null)
-  
+
   const [captainStats, setCaptainStats] = useState(() => {
     const today = new Date().toLocaleDateString('en-CA')
     const stored = localStorage.getItem('captainStats')
     if (stored) {
-      try { 
+      try {
         const stats = JSON.parse(stored)
         if (stats.lastResetDate !== today) {
           return { earnings: 0, rides: 0, onlineSeconds: 0, lastResetDate: today }
@@ -36,7 +36,7 @@ const CaptainHome = () => {
     const checkAndResetStats = () => {
       const today = new Date().toLocaleDateString('en-CA')
       const stored = localStorage.getItem('captainStats')
-      
+
       if (stored) {
         try {
           const stats = JSON.parse(stored)
@@ -208,7 +208,7 @@ const CaptainHome = () => {
 
       {/* Map */}
       <div className="absolute inset-0 z-0">
-        <LiveTracking 
+        <LiveTracking
           captainLocation={currentLocation || captainData?.location}
           pickupCoords={incomingRideRequest?.pickupCoordinates || null}
           destinationCoords={incomingRideRequest?.destinationCoordinates || null}
@@ -216,10 +216,10 @@ const CaptainHome = () => {
           destString={incomingRideRequest?.destination}
         />
       </div>
-      
+
       {/* Top Bar */}
       <div className="absolute top-6 left-6 z-20 flex items-center gap-3">
-        <img src="/velocity_logo_v2.png" alt="Velocity" className="h-14" />
+        <img src="/velocity_logo.png" alt="Velocity" className="h-7" />
         <span className="rounded-full bg-surface-container-lowest/90 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-primary border border-outline-variant/20 shadow-sm backdrop-blur-sm">Captain</span>
       </div>
 
@@ -237,7 +237,7 @@ const CaptainHome = () => {
             earnings={Math.floor(captainStats.earnings)}
             rides={captainStats.rides}
             onlineHours={formatOnlineHours(captainStats.onlineSeconds)}
-            onClose={() => {}}
+            onClose={() => { }}
           />
         </div>
       )}

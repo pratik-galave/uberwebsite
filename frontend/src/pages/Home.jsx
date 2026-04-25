@@ -31,8 +31,8 @@ const Home = () => {
   const pickupInputRef = useRef(null)
   const destinationInputRef = useRef(null)
 
-  const {sendMessageToEvent, receiveMessageFromEvent, isConnected} = useContext(SocketDataContext)
-  const {userData} = useContext(UserDataContext)
+  const { sendMessageToEvent, receiveMessageFromEvent, isConnected } = useContext(SocketDataContext)
+  const { userData } = useContext(UserDataContext)
 
   useEffect(() => {
     if (!isConnected) return
@@ -42,7 +42,7 @@ const Home = () => {
   useEffect(() => {
     const userId = userData?._id
     if (!userId) return
-    sendMessageToEvent('join', {userType: 'user', userId})
+    sendMessageToEvent('join', { userType: 'user', userId })
   }, [sendMessageToEvent, userData])
 
   useEffect(() => {
@@ -244,7 +244,7 @@ const Home = () => {
     try {
       const res = await axios.get(`https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lng}&format=json`)
       if (res.data?.display_name) setPickupLocation(res.data.display_name)
-    } catch {}
+    } catch { }
   }
 
   const handleDestinationChange = async (coords) => {
@@ -252,7 +252,7 @@ const Home = () => {
     try {
       const res = await axios.get(`https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lng}&format=json`)
       if (res.data?.display_name) setDestination(res.data.display_name)
-    } catch {}
+    } catch { }
   }
 
   const handleProceedToVehicleSelection = () => {
@@ -304,7 +304,7 @@ const Home = () => {
 
       {/* Logo */}
       <div className="absolute top-6 left-6 z-20">
-        <img src="/velocity_logo_v2.png" alt="Velocity" className="h-14" />
+        <img src="/velocity_logo.png" alt="Velocity" className="h-7" />
       </div>
 
       {/* Search Card */}

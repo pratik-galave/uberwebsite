@@ -43,7 +43,7 @@ const UserSignup = () => {
       {/* Navigation */}
       <nav className="flex items-center justify-between px-8 py-5 border-b border-outline-variant/30">
         <Link to="/" className="text-2xl font-extrabold tracking-tight font-display">
-          <img src="/velocity_logo_v2.png" alt="Velocity" className="h-16" />
+          <img src="/velocity_logo.png" alt="Velocity" className="h-8" />
         </Link>
         <Link to="/login" className="text-sm font-medium text-on-surface-variant hover:text-on-surface transition-colors">
           Already have an account?
