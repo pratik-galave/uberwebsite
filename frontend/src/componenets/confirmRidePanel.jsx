@@ -1,5 +1,4 @@
 import React from 'react'
-import { IoLocation, IoCarSport, IoCheckmarkCircle, IoArrowBack } from 'react-icons/io5'
 
 const ConfirmRidePanel = ({
   pickupLocation,
@@ -14,99 +13,108 @@ const ConfirmRidePanel = ({
   errorMessage = '',
 }) => {
   return (
-    <div className="w-full overflow-hidden rounded-t-4xl bg-white shadow-[0_-12px_30px_rgba(0,0,0,0.24)]">
-      <div className="px-4 pb-4 pt-3">
-        <div className="mx-auto mb-3 h-1.5 w-14 rounded-full bg-neutral-300" />
-
-          <div className="mb-4 flex items-center gap-2">
+    <div className="w-full overflow-hidden rounded-t-3xl bg-surface-variant/40 border border-outline/20 shadow-[0_-20px_40px_rgba(0,0,0,0.6)] backdrop-blur-[40px] relative">
+      {/* Subtle top edge highlight */}
+      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+      
+      <div className="px-container-margin pb-6 pt-5">
+        <div className="mb-stack-md flex items-center justify-between">
+          <div className="flex items-center gap-3">
             {onBack && (
               <button
                 type="button"
                 onClick={onBack}
-                className="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-neutral-100"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-surface-container-lowest border border-outline/20 text-on-surface shadow-sm transition hover:bg-surface-variant"
               >
-                <IoArrowBack className="h-5 w-5 text-black" />
+                <span className="material-symbols-outlined">arrow_back</span>
               </button>
             )}
-            <div className="flex-1 text-center">
-              <p className="text-3xl font-semibold tracking-tight text-black">Confirm your ride</p>
-              <p className="mt-2 text-base text-neutral-500">Review and confirm your ride details</p>
+            <h3 className="font-display-sm text-display-sm tracking-tight text-on-surface">Confirm Ride</h3>
+          </div>
+        </div>
+
+        <div className="mt-stack-md flex items-center justify-center">
+          <div className="relative flex h-32 w-full items-center justify-center rounded-2xl bg-gradient-to-b from-surface-container-lowest/80 to-surface-variant/40 border border-outline/10 overflow-hidden shadow-inner">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,229,255,0.05),transparent_70%)]" />
+            <div className="absolute h-20 w-40 rounded-full bg-primary-container/20 blur-xl" />
+            {vehicleIcon || <span className="material-symbols-outlined text-[64px] text-primary-container relative z-10 drop-shadow-[0_0_15px_rgba(0,229,255,0.3)]">directions_car</span>}
+          </div>
+        </div>
+
+        <div className="mt-stack-md flex flex-col gap-3 relative rounded-2xl bg-surface-container-lowest/40 border border-outline/10 p-4">
+          {/* Connecting line */}
+          <div className="absolute left-[35px] top-[40px] bottom-[40px] w-[2px] bg-outline/20 z-0 border-l border-dashed border-outline/50"></div>
+          
+          <div className="relative z-10 flex items-start gap-4">
+            <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-variant/50 text-primary-container border border-outline/10 shadow-[0_0_10px_rgba(255,255,255,0.02)]">
+              <span className="material-symbols-outlined text-[18px]">radio_button_checked</span>
+            </div>
+            <div className="min-w-0 flex-1 border-b border-outline/10 pb-3">
+              <p className="font-display-xs text-[16px] leading-tight text-on-surface tracking-wide truncate">{pickupLocation || 'Pickup location'}</p>
+              <p className="mt-0.5 font-body-sm text-[12px] text-on-surface-variant/70 uppercase font-label-caps">Pick-up point</p>
             </div>
           </div>
 
-          <div className="mt-6 flex items-center justify-center">
-            <div className="relative flex h-40 w-full items-center justify-center rounded-4xl bg-neutral-100">
-              <div className="absolute inset-0 rounded-4xl bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.12),transparent_62%)]" />
-              <div className="absolute h-24 w-40 rounded-full bg-blue-100/50 blur-xl" />
-              {vehicleIcon || <IoCarSport className="relative z-10 h-20 w-20 text-neutral-900 drop-shadow-lg" />}
+          <div className="relative z-10 flex items-start gap-4">
+            <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-variant/50 text-[#00B8D4] border border-outline/10 shadow-[0_0_10px_rgba(255,255,255,0.02)]">
+              <span className="material-symbols-outlined text-[18px]">location_on</span>
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-display-xs text-[16px] leading-tight text-on-surface tracking-wide truncate">{destination || 'Destination'}</p>
+              <p className="mt-0.5 font-body-sm text-[12px] text-on-surface-variant/70 uppercase font-label-caps">Drop-off point</p>
             </div>
           </div>
+        </div>
 
-          <div className="mt-6 space-y-3 rounded-[1.6rem] border border-neutral-200 bg-white p-4 shadow-sm">
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-800">
-                <IoLocation className="h-4.5 w-4.5" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[1.15rem] font-semibold leading-tight text-black">{pickupLocation || 'Pickup location'}</p>
-                <p className="mt-1 text-sm leading-snug text-neutral-600">Pick-up point</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 border-t border-neutral-200 pt-3">
-              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-800">
-                <IoLocation className="h-4.5 w-4.5" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[1.15rem] font-semibold leading-tight text-black">{destination || 'Destination'}</p>
-                <p className="mt-1 text-sm leading-snug text-neutral-600">Drop-off point</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 border-t border-neutral-200 pt-3">
-              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-800">
-                <IoCarSport className="h-4.5 w-4.5" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[1.15rem] font-semibold leading-tight text-black">{vehicleName || 'Selected vehicle'}</p>
-                <p className="mt-1 text-sm leading-snug text-neutral-600">Your chosen ride type</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 flex items-center justify-between rounded-[1.35rem] border border-neutral-200 bg-neutral-50 px-4 py-3">
-            <div>
-              <p className="text-sm text-neutral-500">Estimated fare</p>
-              <p className="text-[1.35rem] font-semibold text-black">{fare != null && fare !== '' ? fare : 'Fare unavailable'}</p>
-            </div>
-          </div>
-
-          <div className="mt-4 flex gap-2">
-            <button
-              type="button"
-              onClick={onCancel}
-              disabled={isSubmitting}
-              className="h-12 flex-1 rounded-xl border border-neutral-300 bg-white text-[1.1rem] font-semibold text-black transition hover:bg-neutral-50"
-            >
-              Cancel
-            </button>
-
-            <button
-              type="button"
-              onClick={onConfirm}
-              disabled={isSubmitting}
-              className="flex h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-black text-[1.1rem] font-semibold text-white transition hover:bg-neutral-900 disabled:cursor-not-allowed disabled:bg-neutral-500"
-            >
-              <IoCheckmarkCircle className="h-5 w-5" />
-              {isSubmitting ? 'Creating Ride...' : 'Confirm Ride'}
-            </button>
-          </div>
-
-          {errorMessage ? (
-            <p className="mt-3 rounded-lg bg-red-100 px-3 py-2 text-sm font-medium text-red-700">
-              {errorMessage}
+        <div className="mt-3 flex items-center justify-between rounded-2xl border border-primary-container/20 bg-primary-container/5 px-5 py-4 backdrop-blur-sm">
+          <div>
+            <p className="font-label-caps text-[10px] text-primary-container uppercase tracking-widest mb-1">Estimated Fare</p>
+            <p className="font-display-md text-[24px] text-on-surface tracking-tighter">
+              {fare != null && fare !== '' ? fare : '--'}
             </p>
-          ) : null}
+          </div>
+          <div className="flex flex-col items-end">
+            <p className="font-label-caps text-[10px] text-on-surface-variant uppercase tracking-widest mb-1">Vehicle</p>
+            <p className="font-display-xs text-[16px] text-on-surface tracking-wide">{vehicleName || 'Standard'}</p>
+          </div>
+        </div>
+
+        <div className="mt-stack-lg flex gap-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isSubmitting}
+            className="h-14 w-[100px] rounded-xl border border-outline/20 bg-surface-container-lowest/60 text-on-surface font-label-caps text-[12px] uppercase tracking-widest transition hover:bg-surface-variant/40 disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center justify-center gap-1"
+          >
+            <span className="material-symbols-outlined text-[20px]">close</span>
+            Cancel
+          </button>
+
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={isSubmitting}
+            className="flex h-14 flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary-container to-[#00B8D4] text-on-primary-fixed font-label-caps text-[14px] uppercase tracking-widest shadow-[0_0_20px_rgba(0,229,255,0.25)] transition-all enabled:hover:shadow-[0_0_25px_rgba(0,229,255,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? (
+              <span className="flex items-center gap-2">
+                <span className="material-symbols-outlined animate-spin text-[20px]">refresh</span>
+                Processing...
+              </span>
+            ) : (
+              <span className="flex items-center gap-2">
+                Confirm
+                <span className="material-symbols-outlined text-[20px]">check_circle</span>
+              </span>
+            )}
+          </button>
+        </div>
+
+        {errorMessage ? (
+          <p className="mt-4 rounded-lg border border-error-container bg-error-container/10 px-4 py-3 text-[12px] font-body-sm text-error">
+            {errorMessage}
+          </p>
+        ) : null}
       </div>
     </div>
   )

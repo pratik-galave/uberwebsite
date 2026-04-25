@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Velocity - Vehicle Selection</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#62ff96",
+                        "surface-variant": "#353436",
+                        "on-tertiary-fixed": "#20005f",
+                        "tertiary-fixed": "#e8deff",
+                        "surface-container-low": "#1c1b1c",
+                        "outline-variant": "#3b494c",
+                        "surface": "#131314",
+                        "surface-container-highest": "#353436",
+                        "secondary-fixed-dim": "#00e475",
+                        "error-container": "#93000a",
+                        "on-primary-fixed": "#001f24",
+                        "on-primary-fixed-variant": "#004f58",
+                        "outline": "#849396",
+                        "primary-fixed-dim": "#00daf3",
+                        "surface-bright": "#3a393a",
+                        "on-secondary-fixed-variant": "#005226",
+                        "secondary": "#7dffa2",
+                        "surface-container-lowest": "#0e0e0f",
+                        "secondary-container": "#05e777",
+                        "on-secondary-container": "#00622e",
+                        "inverse-primary": "#006875",
+                        "on-background": "#e5e2e3",
+                        "on-tertiary-fixed-variant": "#4f00d0",
+                        "on-secondary-fixed": "#00210b",
+                        "primary": "#c3f5ff",
+                        "on-primary": "#00363d",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-container": "#00626e",
+                        "surface-container-high": "#2a2a2b",
+                        "primary-container": "#00e5ff",
+                        "inverse-on-surface": "#313031",
+                        "on-surface": "#e5e2e3",
+                        "surface-dim": "#131314",
+                        "inverse-surface": "#e5e2e3",
+                        "on-surface-variant": "#bac9cc",
+                        "on-tertiary-container": "#622be5",
+                        "surface-tint": "#00daf3",
+                        "primary-fixed": "#9cf0ff",
+                        "tertiary-container": "#d6c9ff",
+                        "on-secondary": "#003918",
+                        "surface-container": "#201f20",
+                        "error": "#ffb4ab",
+                        "tertiary-fixed-dim": "#cdbdff",
+                        "background": "#131314",
+                        "on-tertiary": "#370096",
+                        "tertiary": "#f1e9ff",
+                        "on-error": "#690005"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "stack-md": "16px",
+                        "container-margin": "24px",
+                        "stack-sm": "8px",
+                        "safe-area-bottom": "44px",
+                        "gutter": "16px",
+                        "stack-lg": "32px"
+                    },
+                    "fontFamily": {
+                        "display-xl": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "data-mono": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-xl": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-caps": ["12px", { "lineHeight": "1.0", "letterSpacing": "0.1em", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "data-mono": ["14px", { "lineHeight": "1.0", "letterSpacing": "0.05em", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar for horizontal list */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface h-screen w-screen overflow-hidden relative font-body-md text-body-md selection:bg-primary-container selection:text-on-primary-container">
+<!-- Map Background Canvas -->
+<div class="absolute inset-0 z-0">
+<div class="absolute inset-0 bg-gradient-to-b from-background/80 via-transparent to-background/90 z-10 pointer-events-none"></div>
+<img alt="Map view" class="w-full h-full object-cover" data-alt="monochromatic dark aesthetic digital map centered on a stylized city grid with subtle glowing neon blue routes and emerald green destination markers, high-end 3D rendering" data-location="Metropolis" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfYJcAlpAs3ty2TnmobnErzWSiJB6J3bth3JyovX7Nr3mTZzDye8pYj_949XxvyfOvcQPPfkWVRAsMJNjNcGNvTD9OrRKBgMFq6x1ZKuDXOhf5zFxnWiUwOVZWhgyxti8XGm6DtJJnf5m_DPoYiOH99vEI_cDHGOZVl_1nT_3vWYHdiTEE7IPFuCmIFffaTOyivQ5I-o7vutzvWfaJaNy_eDq9s4-8laB6PJuIqO8Qd7s0r1JwlkK-9buL0UeItMhtVDxWZm5iOy1M"/>
+<!-- Destination Pin -->
+<div class="absolute top-[40%] left-[50%] -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center drop-shadow-[0_0_20px_rgba(98,255,150,0.5)]">
+<span class="material-symbols-outlined text-secondary-fixed text-[48px]" style="font-variation-settings: 'FILL' 1;">location_on</span>
+<div class="w-3 h-1 bg-black/50 rounded-[100%] mt-1 blur-[2px]"></div>
+</div>
+<!-- Route Line (Stylized SVG) -->
+<svg class="absolute top-[50%] left-[40%] w-[100px] h-[150px] z-10 pointer-events-none drop-shadow-[0_0_10px_rgba(0,229,255,0.4)]" fill="none" viewbox="0 0 100 150" xmlns="http://www.w3.org/2000/svg">
+<path d="M10 140 C 40 90, 80 60, 90 10" stroke="#00e5ff" stroke-dasharray="8 8" stroke-linecap="round" stroke-width="4"></path>
+</svg>
+<!-- Origin Pin (User Location) -->
+<div class="absolute top-[65%] left-[38%] -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center">
+<div class="w-6 h-6 bg-primary-container rounded-full border-[3px] border-background drop-shadow-[0_0_15px_rgba(0,229,255,0.8)] shadow-inner"></div>
+</div>
+</div>
+<!-- TopAppBar -->
+<header class="fixed w-full z-50 top-0 border-b border-white/10 bg-[#050505]/70 backdrop-blur-3xl shadow-2xl">
+<div class="flex justify-between items-center w-full px-6 py-4">
+<!-- Back Action for Transactional Flow -->
+<button class="text-zinc-500 hover:text-white transition-colors duration-300 Active: scale-95 transition-transform flex items-center justify-center">
+<span class="material-symbols-outlined">arrow_back_ios_new</span>
+</button>
+<div class="text-xl font-black tracking-tighter text-white font-inter tracking-tight antialiased">
+                VELOCITY
+            </div>
+<div class="flex items-center gap-4 text-cyan-400 font-bold">
+<button class="text-zinc-500 hover:text-white transition-colors duration-300 Active: scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-zinc-500 hover:text-white transition-colors duration-300 Active: scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Floating Vehicle Selection Panel -->
+<div class="absolute bottom-0 w-full z-40 bg-[rgba(20,20,22,0.85)] backdrop-blur-[30px] border-t border-white/10 rounded-t-3xl shadow-[0_-20px_50px_rgba(0,0,0,0.6)] pt-stack-md pb-safe-area-bottom flex flex-col">
+<!-- Drag Handle Indicator -->
+<div class="w-12 h-1.5 bg-surface-variant rounded-full mx-auto mb-stack-sm opacity-50"></div>
+<div class="px-container-margin mb-stack-md flex justify-between items-end">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Select Ride</h2>
+<p class="font-data-mono text-data-mono text-on-surface-variant mt-1">12 min to destination</p>
+</div>
+</div>
+<!-- Horizontal Scrollable Vehicle List -->
+<div class="w-full overflow-x-auto hide-scrollbar px-container-margin pb-stack-md flex gap-gutter snap-x snap-mandatory">
+<!-- Economy Option -->
+<div class="snap-start min-w-[140px] flex-shrink-0 bg-surface/40 border border-outline-variant/50 rounded-xl p-stack-sm flex flex-col items-center justify-between relative transition-all duration-300">
+<img alt="Economy Car" class="w-24 h-16 object-contain drop-shadow-xl mb-2 mix-blend-screen" data-alt="high quality 3D render of a sleek silver compact sedan side profile against a dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuClm7uSrELdvUnwk0luNwaalo91ysDOs5PM4VnKAgNPujJQd_CNji7jAIq-2uktkt13dI4TP976EkX054O9m0KpS5lOvNEv3-52iTouRkC9YGvhaUH9VGCELDSz3fTB36XsfJeeBCZD4HliGsL6Vqj1GyoNemVKFLwbOh8OKunJhoSC8TAFrRoREhLmi9y9zOUvq5026NQ8x5jd6Jg4YyNbgm7hYHfaNVm4wFiXaj6RBS_2w-G1GOWiewLVOh_cf25DXjMZS2W6zPc3"/>
+<div class="w-full text-center">
+<h3 class="font-body-lg text-body-lg text-on-surface font-semibold">Economy</h3>
+<div class="flex justify-between items-center mt-1 w-full px-2">
+<span class="font-data-mono text-data-mono text-on-surface-variant">3 min</span>
+<span class="font-body-md text-body-md text-on-surface font-bold">$18</span>
+</div>
+</div>
+</div>
+<!-- Premium Option (Active/Selected) -->
+<div class="snap-start min-w-[150px] flex-shrink-0 bg-[rgba(0,229,255,0.05)] border border-primary-container rounded-xl p-stack-sm flex flex-col items-center justify-between relative shadow-[0_0_20px_rgba(0,229,255,0.15)] transform scale-105 z-10 transition-all duration-300">
+<!-- Glowing Top Edge -->
+<div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary-container to-transparent opacity-70"></div>
+<img alt="Premium Car" class="w-28 h-18 object-contain drop-shadow-[0_10px_15px_rgba(0,0,0,0.8)] mb-2 mix-blend-screen" data-alt="high quality 3D render of a luxury matte black executive sedan side profile with glowing neon accents against a dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASm_NMkd7kzBLCkanbuHWiuCF-Lei2qghaVP0bLaFBfhQ9wcNn-9kWB_NfezeDYRRw2QgN8jwDA1wS3iJLuTyQw3tAMBuy3SiCENScho8LKGT_rvbdeO6s5DUwgiRE2YIt43wKumTNQ181uDYnOrLb4PvP2Qd1uKWYPx7SGx5Pm1JUf5l_050KfKraW_jdp-3iqkfuwZTS0pN_MsrOeGiWrGDa5f28K1Le7VrU268-46w5vQWpQXTuhifChgmLsAlRBPr28FeUbE5w"/>
+<div class="w-full text-center">
+<h3 class="font-body-lg text-body-lg text-primary-container font-bold">Premium</h3>
+<div class="flex justify-between items-center mt-1 w-full px-2">
+<span class="font-data-mono text-data-mono text-secondary-fixed">1 min</span>
+<span class="font-body-md text-body-md text-on-surface font-bold">$34</span>
+</div>
+</div>
+</div>
+<!-- Moto Option -->
+<div class="snap-start min-w-[140px] flex-shrink-0 bg-surface/40 border border-outline-variant/50 rounded-xl p-stack-sm flex flex-col items-center justify-between relative transition-all duration-300">
+<img alt="Moto" class="w-20 h-16 object-contain drop-shadow-xl mb-2 mix-blend-screen" data-alt="high quality 3D render of a sleek futuristic electric motorcycle side profile against a dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAM1euvFAWS06Gu55qErot7pskjunC-dEBwFMrfm-En3vA_tc3Y56IOqWa6aDFBrL6RQPDPiUSkrtD8xEDnwwIFNei_DTBOdE4e3mpAXICO9f9PDqoHo9ooNXcCVN7499gDMWH6jEajPDfkUsOipGv79G0e2IOj8gjvSr5uS2NUfcgyAmysqCWYdfGe1bRz7FRYpWvodkZiTzvabnAyytZycS6IVPSPH1D1UAfgnqQs9htuBdP9YWMf0w0pq8rI7u0F_lchXYCBMNzv"/>
+<div class="w-full text-center">
+<h3 class="font-body-lg text-body-lg text-on-surface font-semibold">Moto</h3>
+<div class="flex justify-between items-center mt-1 w-full px-2">
+<span class="font-data-mono text-data-mono text-on-surface-variant">5 min</span>
+<span class="font-body-md text-body-md text-on-surface font-bold">$12</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Payment & Action Area -->
+<div class="px-container-margin pt-stack-sm flex flex-col gap-stack-md">
+<!-- Payment Selector -->
+<div class="flex items-center justify-between bg-surface-container-low border border-white/5 rounded-lg p-3">
+<div class="flex items-center gap-3">
+<div class="w-8 h-6 bg-surface-bright rounded flex items-center justify-center border border-white/10">
+<span class="material-symbols-outlined text-[16px] text-on-surface">credit_card</span>
+</div>
+<span class="font-data-mono text-data-mono text-on-surface">•••• 4242</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">chevron_right</span>
+</div>
+<!-- Confirm Button -->
+<button class="w-full py-4 bg-primary-container text-on-primary-container font-label-caps text-label-caps rounded-full shadow-[0_0_20px_rgba(0,229,255,0.25)] hover:shadow-[0_0_30px_rgba(0,229,255,0.4)] transition-all duration-300 relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                CONFIRM PREMIUM
+            </button>
+</div>
+</div>
+</body></html>

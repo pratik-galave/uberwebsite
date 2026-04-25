@@ -24,8 +24,11 @@ const CaptainLogout = () => {
   }, [navigate, setCaptainData])
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-neutral-200 px-6 text-black">
-      <p className="text-lg font-medium">Logging captain out...</p>
+    <main className="flex min-h-screen items-center justify-center bg-background px-6 text-on-surface">
+      <div className="flex flex-col items-center gap-4">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-outline/20 border-t-primary-container"></div>
+        <p className="font-label-caps text-label-caps uppercase tracking-widest text-on-surface-variant">Signing out...</p>
+      </div>
     </main>
   )
 }

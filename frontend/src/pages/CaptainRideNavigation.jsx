@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { IoArrowBackOutline, IoNavigate } from 'react-icons/io5'
 import { SocketDataContext } from '../context/socketDataContext.js'
 import { CaptainDataContext } from '../context/captainDataContext.js'
 import LiveTracking from '../componenets/liveTracking.jsx'
@@ -215,8 +214,8 @@ const CaptainRideNavigation = () => {
   }
 
   return (
-    <main className="fixed inset-0 w-full overflow-hidden bg-neutral-100 text-black">
-      <div className="absolute inset-0">
+    <main className="fixed inset-0 w-full overflow-hidden bg-background text-on-background antialiased">
+      <div className="absolute inset-0 z-0">
         <LiveTracking
           captainLocation={captainLocation}
           pickupCoords={rideMeta.pickupCoordinates}
@@ -225,51 +224,68 @@ const CaptainRideNavigation = () => {
           destString={rideMeta.destination}
         />
       </div>
-      <div className="absolute inset-0 bg-white/20" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-background/60 pointer-events-none z-10" />
 
-      <header className="absolute inset-x-0 top-0 z-20 border-b border-neutral-200 bg-white/95 px-4 pb-3 pt-4 backdrop-blur-sm">
+      <header className="absolute inset-x-0 top-0 z-20 px-container-margin pt-6 pb-4 bg-gradient-to-b from-surface-variant/80 to-transparent backdrop-blur-md border-b border-outline/10">
         <div className="flex items-center justify-between gap-3">
           <Link
             to={isCaptainView ? '/captain-home' : '/home'}
             aria-label={isCaptainView ? 'Back to captain home' : 'Back to home'}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-100 text-neutral-900"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container-lowest border border-outline/20 text-on-surface shadow-[0_0_15px_rgba(0,0,0,0.5)] transition hover:bg-surface-variant"
           >
-            <IoArrowBackOutline className="h-5 w-5" />
+            <span className="material-symbols-outlined text-[20px]">arrow_back</span>
           </Link>
 
-          <p className="text-xl font-semibold tracking-tight text-black">{isCaptainView ? 'Pick up' : 'Live Ride'}</p>
+          <p className="font-display-sm text-[20px] font-bold tracking-tight text-on-surface">{isCaptainView ? 'Active Mission' : 'Live Tracking'}</p>
 
-          <div className="h-9 w-9" />
+          <div className="h-10 w-10 flex items-center justify-center rounded-full bg-surface-container-lowest border border-outline/20 text-primary-container shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+            <span className="material-symbols-outlined text-[20px]">my_location</span>
+          </div>
         </div>
 
-        <div className="mt-3 flex items-center gap-2 rounded-md bg-amber-400 px-3 py-2 text-sm text-black">
-          <span className="font-semibold">Live</span>
-          <span>{isCaptainView ? 'Captain location updates every 10 seconds' : 'Tracking your captain in real time'}</span>
+        <div className="mt-stack-sm flex items-center gap-2 rounded-xl border border-[#00E676]/30 bg-[#00E676]/10 px-3 py-2 text-[#00E676] shadow-[0_0_15px_rgba(0,230,118,0.15)] backdrop-blur-md">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00E676] opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00E676]"></span>
+          </span>
+          <span className="font-label-caps text-[10px] uppercase tracking-widest pt-0.5 font-bold">Live Status</span>
+          <span className="font-body-sm text-[12px] opacity-80 border-l border-[#00E676]/30 pl-2 ml-1 truncate">
+            {isCaptainView ? 'Transmitting telemetry' : 'Tracking captain telemetry'}
+          </span>
         </div>
       </header>
 
-      <div className="absolute inset-x-0 bottom-0 z-20 rounded-t-3xl bg-white px-4 pt-4 pb-5 shadow-[0_-12px_30px_rgba(0,0,0,0.24)] transition-all duration-300">
+      <div className={`absolute inset-x-0 bottom-0 z-20 rounded-t-3xl bg-surface-variant/40 border border-outline/20 shadow-[0_-20px_40px_rgba(0,0,0,0.6)] backdrop-blur-[40px] px-container-margin pt-2 pb-6 transition-transform duration-300 ease-in-out ${isPanelOpen ? 'translate-y-0' : 'translate-y-[calc(100%-80px)]'}`}>
+        {/* Subtle top edge highlight */}
+        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+        
         <div
-          className="flex w-full cursor-pointer justify-center pb-3 -mt-2 pt-2"
+          className="flex w-full cursor-pointer justify-center pb-3 pt-2"
           onClick={togglePanel}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
         >
-          <div className="h-1.5 w-14 rounded-full bg-neutral-300" />
+          <div className="h-1.5 w-14 rounded-full bg-outline/30" />
         </div>
 
-        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isPanelOpen ? 'max-h-48 opacity-100 mb-4' : 'max-h-0 opacity-0'}`}>
-          <div className="flex items-start gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-400 text-sm font-semibold text-black">
-              A
+        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isPanelOpen ? 'max-h-64 opacity-100 mb-stack-md' : 'max-h-0 opacity-0 mb-0'}`}>
+          <div className="flex items-start gap-4 rounded-2xl bg-surface-container-lowest/40 border border-outline/10 p-4 relative">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-container/20 border border-primary-container/30 text-primary-container shadow-[0_0_10px_rgba(0,229,255,0.2)]">
+              <span className="material-symbols-outlined text-[18px]">radio_button_checked</span>
             </div>
 
             <div className="min-w-0 flex-1">
-              <p className="text-sm text-neutral-400">Pick up at</p>
-              <p className="text-[1.7rem] font-semibold leading-tight text-black">{rideMeta.origin || 'Pickup location'}</p>
-              <p className="mt-1 text-base text-neutral-500">
-                {rideMeta.destination ? `Drop at ${rideMeta.destination}` : 'Destination not available'}
-              </p>
+              <p className="font-label-caps text-[10px] text-primary-container uppercase tracking-widest mb-1">Current Objective</p>
+              <p className="font-display-sm text-[20px] font-semibold leading-tight text-on-surface truncate">{rideMeta.origin || 'Pickup location'}</p>
+              
+              <div className="mt-3 pt-3 border-t border-outline/10 flex items-start gap-3">
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface-variant/50 border border-outline/20 text-[#00B8D4]">
+                  <span className="material-symbols-outlined text-[14px]">location_on</span>
+                </div>
+                <p className="font-body-sm text-[14px] text-on-surface-variant/80 truncate pt-0.5">
+                  {rideMeta.destination || 'Destination pending'}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -278,19 +294,19 @@ const CaptainRideNavigation = () => {
           <button
             type="button"
             onClick={isRideStarted ? handleRideCompleted : handleStartRide}
-            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-black text-lg font-semibold text-white transition hover:bg-neutral-800"
+            className={`inline-flex h-14 w-full items-center justify-center gap-2 rounded-xl text-background font-label-caps text-[14px] uppercase tracking-widest font-bold shadow-[0_0_20px_rgba(0,0,0,0.3)] transition-all ${isRideStarted ? 'bg-gradient-to-r from-error to-[#FF5252] shadow-[0_0_20px_rgba(255,82,82,0.3)] hover:shadow-[0_0_25px_rgba(255,82,82,0.5)]' : 'bg-gradient-to-r from-[#00E676] to-[#00C853] shadow-[0_0_20px_rgba(0,230,118,0.3)] hover:shadow-[0_0_25px_rgba(0,230,118,0.5)]'}`}
           >
-            <IoNavigate className="h-5 w-5" />
-            {isRideStarted ? 'Drop Off' : 'Start Ride'}
+            <span className="material-symbols-outlined text-[20px]">{isRideStarted ? 'stop_circle' : 'navigation'}</span>
+            {isRideStarted ? 'Complete Mission' : 'Commence Journey'}
           </button>
         ) : (
           <button
             type="button"
             onClick={handleUserDropOff}
-            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-black text-lg font-semibold text-white transition hover:bg-neutral-800"
+            className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#00E676] to-[#00C853] text-background font-label-caps text-[14px] uppercase tracking-widest font-bold shadow-[0_0_20px_rgba(0,230,118,0.3)] transition-all hover:shadow-[0_0_25px_rgba(0,230,118,0.5)]"
           >
-            <IoNavigate className="h-5 w-5" />
-            Drop Off
+            <span className="material-symbols-outlined text-[20px]">navigation</span>
+            Arrive at Destination
           </button>
         )}
       </div>

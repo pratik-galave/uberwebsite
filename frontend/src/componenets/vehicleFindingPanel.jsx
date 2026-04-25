@@ -1,85 +1,101 @@
 import React from 'react'
-import { IoLocation, IoCarSport, IoCashOutline } from 'react-icons/io5'
 
 const VehicleFindingPanel = ({ pickupLocation, destination, vehicleName, fare, onClose, onFoundDriver }) => {
   return (
-    <div className="w-full overflow-hidden rounded-t-4xl bg-white shadow-[0_-12px_30px_rgba(0,0,0,0.24)]">
-      <div className="px-4 pb-4 pt-3">
-        <div className="mx-auto mb-3 h-1.5 w-14 rounded-full bg-neutral-300" />
+    <div className="w-full overflow-hidden rounded-t-3xl bg-surface-variant/40 border border-outline/20 shadow-[0_-20px_40px_rgba(0,0,0,0.6)] backdrop-blur-[40px] relative">
+      {/* Subtle top edge highlight */}
+      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+      
+      {/* Scanning laser line animation */}
+      <div className="absolute top-0 left-0 w-full h-[2px] bg-primary-container shadow-[0_0_15px_#00E5FF] opacity-70 animate-[scan_2s_ease-in-out_infinite]"></div>
+      
+      <div className="px-container-margin pb-6 pt-5">
+        <div className="mb-stack-lg text-center">
+          <h3 className="font-display-sm text-display-sm tracking-tight text-on-surface">Connecting to Grid</h3>
+          <p className="font-body-sm text-body-sm text-on-surface-variant/70 mt-1">Locating optimal pilot...</p>
+        </div>
 
-          <div className="text-center">
-            <p className="text-3xl font-semibold tracking-tight text-black">Looking for nearby drivers</p>
-            <p className="mt-2 text-base text-neutral-500">Matching you with the closest available ride</p>
+        <div className="mt-stack-md flex items-center justify-center relative py-6">
+          {/* Radar effect */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="absolute w-[200px] h-[200px] rounded-full border border-primary-container/20 animate-ping" style={{ animationDuration: '3s' }}></div>
+            <div className="absolute w-[150px] h-[150px] rounded-full border border-primary-container/30 animate-ping" style={{ animationDuration: '3s', animationDelay: '1s' }}></div>
+            <div className="absolute w-[100px] h-[100px] rounded-full border border-primary-container/40 animate-ping" style={{ animationDuration: '3s', animationDelay: '2s' }}></div>
           </div>
+          
+          <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-surface-container-lowest/80 border border-outline/20 shadow-[0_0_30px_rgba(0,229,255,0.2)] z-10">
+            <span className="material-symbols-outlined text-[40px] text-primary-container">radar</span>
+          </div>
+        </div>
 
-          <div className="mt-6 flex items-center justify-center">
-            <div className="relative flex h-40 w-full items-center justify-center rounded-4xl bg-neutral-100">
-              <div className="absolute inset-0 rounded-4xl bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.12),transparent_62%)]" />
-              <div className="absolute h-24 w-40 rounded-full bg-blue-100/50 blur-xl" />
-              <IoCarSport className="relative z-10 h-20 w-20 text-neutral-900 drop-shadow-lg" />
+        <div className="mt-stack-lg flex flex-col gap-3 relative rounded-2xl bg-surface-container-lowest/40 border border-outline/10 p-4">
+          {/* Connecting line */}
+          <div className="absolute left-[35px] top-[40px] bottom-[40px] w-[2px] bg-outline/20 z-0 border-l border-dashed border-outline/50"></div>
+          
+          <div className="relative z-10 flex items-start gap-4">
+            <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-variant/50 text-primary-container border border-outline/10 shadow-[0_0_10px_rgba(255,255,255,0.02)]">
+              <span className="material-symbols-outlined text-[18px]">radio_button_checked</span>
+            </div>
+            <div className="min-w-0 flex-1 border-b border-outline/10 pb-3">
+              <p className="font-display-xs text-[16px] leading-tight text-on-surface tracking-wide truncate">{pickupLocation || 'Pickup location'}</p>
+              <p className="mt-0.5 font-body-sm text-[12px] text-on-surface-variant/70 uppercase font-label-caps">Pick-up point</p>
             </div>
           </div>
 
-          <div className="mt-6 space-y-3 rounded-[1.6rem] border border-neutral-200 bg-white p-4 shadow-sm">
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-800">
-                <IoLocation className="h-4.5 w-4.5" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[1.15rem] font-semibold leading-tight text-black">{pickupLocation || 'Pickup location'}</p>
-                <p className="mt-1 text-sm leading-snug text-neutral-600">Pick-up point</p>
-              </div>
+          <div className="relative z-10 flex items-start gap-4">
+            <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-variant/50 text-[#00B8D4] border border-outline/10 shadow-[0_0_10px_rgba(255,255,255,0.02)]">
+              <span className="material-symbols-outlined text-[18px]">location_on</span>
             </div>
-
-            <div className="flex items-start gap-3 border-t border-neutral-200 pt-3">
-              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-800">
-                <IoLocation className="h-4.5 w-4.5" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[1.15rem] font-semibold leading-tight text-black">{destination || 'Destination'}</p>
-                <p className="mt-1 text-sm leading-snug text-neutral-600">Drop-off point</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 border-t border-neutral-200 pt-3">
-              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-800">
-                <IoCarSport className="h-4.5 w-4.5" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[1.15rem] font-semibold leading-tight text-black">{vehicleName || 'Selected vehicle'}</p>
-                <p className="mt-1 text-sm leading-snug text-neutral-600">Driver search in progress</p>
-              </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-display-xs text-[16px] leading-tight text-on-surface tracking-wide truncate">{destination || 'Destination'}</p>
+              <p className="mt-0.5 font-body-sm text-[12px] text-on-surface-variant/70 uppercase font-label-caps">Drop-off point</p>
             </div>
           </div>
+        </div>
 
-          <div className="mt-4 flex items-center justify-between rounded-[1.35rem] border border-neutral-200 bg-neutral-50 px-4 py-3">
-            <div>
-              <p className="text-sm text-neutral-500">Estimated fare</p>
-              <p className="text-[1.35rem] font-semibold text-black">{fare != null && fare !== '' ? fare : 'Fare unavailable'}</p>
-            </div>
-
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-full bg-black px-4 py-2 text-base font-semibold text-white"
-            >
-              Cancel
-            </button>
+        <div className="mt-3 flex items-center justify-between rounded-2xl border border-primary-container/20 bg-primary-container/5 px-5 py-4 backdrop-blur-sm">
+          <div>
+            <p className="font-label-caps text-[10px] text-primary-container uppercase tracking-widest mb-1">Target Fare</p>
+            <p className="font-display-md text-[24px] text-on-surface tracking-tighter">
+              {fare != null && fare !== '' ? fare : '--'}
+            </p>
           </div>
-
-          <div className="mt-4 flex items-center gap-2 rounded-[1.35rem] border border-neutral-200 bg-white px-4 py-3 text-neutral-700">
-            <IoCashOutline className="h-5 w-5" />
-            <span className="text-sm font-medium">Cash / Payment method ready</span>
+          <div className="flex flex-col items-end">
+            <p className="font-label-caps text-[10px] text-on-surface-variant uppercase tracking-widest mb-1">Class</p>
+            <p className="font-display-xs text-[16px] text-on-surface tracking-wide">{vehicleName || 'Standard'}</p>
           </div>
+        </div>
 
+        <div className="mt-stack-lg flex gap-3">
           <button
             type="button"
-            onClick={onFoundDriver}
-            className="mt-4 w-full rounded-xl bg-black py-3 text-[1.1rem] font-semibold text-white transition hover:bg-neutral-900"
+            onClick={onClose}
+            className="flex h-14 w-full items-center justify-center gap-2 rounded-xl border border-error-container/30 bg-error-container/10 text-error font-label-caps text-[14px] uppercase tracking-widest transition hover:bg-error-container/20"
           >
-            Driver Found
+            <span className="material-symbols-outlined text-[20px]">cancel</span>
+            Abort Search
           </button>
+        </div>
+        
+        {/* Hidden button to simulate finding driver for dev purposes */}
+        <button
+          type="button"
+          onClick={onFoundDriver}
+          className="mt-4 w-full text-[10px] text-on-surface-variant/30 font-label-caps uppercase text-center hover:text-on-surface-variant/70 transition"
+        >
+          [Dev: Force Driver Found]
+        </button>
       </div>
+      
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes scan {
+          0% { top: 0; opacity: 0; }
+          10% { opacity: 0.7; }
+          50% { top: 100%; opacity: 0.7; }
+          60% { opacity: 0; }
+          100% { top: 100%; opacity: 0; }
+        }
+      `}} />
     </div>
   )
 }

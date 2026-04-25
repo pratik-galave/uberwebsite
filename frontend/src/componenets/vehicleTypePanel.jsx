@@ -69,7 +69,7 @@ const VehicleTypePanel = ({ pickupLocation, destination, pickupCoords, destinati
   const vehicleOptions = useMemo(() => ([
     {
       id: 'car',
-      icon: <FaCarSide className="h-8 w-8 text-neutral-800" />,
+      icon: <span className="material-symbols-outlined text-[36px] text-primary-container">directions_car</span>,
       title: 'Car',
       capacity: '4',
       eta: fareByVehicle.distance || '...',
@@ -79,7 +79,7 @@ const VehicleTypePanel = ({ pickupLocation, destination, pickupCoords, destinati
     },
     {
       id: 'auto',
-      icon: <FaTaxi className="h-8 w-8 text-amber-500" />,
+      icon: <span className="material-symbols-outlined text-[36px] text-[#FFC107]">local_taxi</span>,
       title: 'Auto',
       capacity: '3',
       eta: fareByVehicle.distance || '...',
@@ -89,7 +89,7 @@ const VehicleTypePanel = ({ pickupLocation, destination, pickupCoords, destinati
     },
     {
       id: 'bike',
-      icon: <FaMotorcycle className="h-8 w-8 text-neutral-700" />,
+      icon: <span className="material-symbols-outlined text-[36px] text-on-surface">two_wheeler</span>,
       title: 'Bike',
       capacity: '1',
       eta: fareByVehicle.distance || '...',
@@ -102,31 +102,36 @@ const VehicleTypePanel = ({ pickupLocation, destination, pickupCoords, destinati
   const selectedOption = vehicleOptions.find((option) => option.id === selectedVehicle)
 
   return (
-    <section className="absolute inset-x-0 bottom-0 z-30 rounded-t-3xl bg-white shadow-[0_-10px_30px_rgba(0,0,0,0.16)]">
-      <div className="px-4 pb-4 pt-3">
-        <div className="mb-3 flex items-center gap-3">
-          <button
-            type="button"
-            onClick={onBack}
-            aria-label="Back to location search"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-800"
-          >
-            <IoArrowBack className="h-5 w-5" />
-          </button>
-          <h3 className="text-2xl font-semibold tracking-tight text-black">Choose a ride</h3>
+    <section className="absolute inset-x-0 bottom-0 z-30 rounded-t-3xl bg-surface-variant/40 border border-outline/20 shadow-[0_-20px_40px_rgba(0,0,0,0.6)] backdrop-blur-[40px] overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+      <div className="px-container-margin pb-6 pt-5">
+        <div className="mb-stack-md flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={onBack}
+              aria-label="Back to location search"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-surface-container-lowest border border-outline/20 text-on-surface shadow-sm transition hover:bg-surface-variant"
+            >
+              <IoArrowBack className="h-5 w-5" />
+            </button>
+            <h3 className="font-display-sm text-display-sm tracking-tight text-on-surface">Select Vehicle</h3>
+          </div>
+          
+          <div className="flex gap-2">
+            <span className="material-symbols-outlined text-on-surface-variant/70 text-[20px]">schedule</span>
+            <span className="font-label-caps text-[12px] text-on-surface-variant/70 uppercase pt-0.5">{isFareLoading ? 'CALC...' : 'NOW'}</span>
+          </div>
         </div>
 
-        <div className="rounded-2xl bg-neutral-100 px-4 py-3 text-[0.95rem] text-neutral-700">
+        <div className="rounded-xl bg-surface-container-lowest/60 border border-outline/10 px-4 py-3 text-[12px] text-on-surface-variant/80 font-body-sm truncate flex gap-2 items-center">
+          <span className="material-symbols-outlined text-[16px] text-[#00B8D4]">route</span>
           {pickupLocation && destination
-            ? `${pickupLocation} -> ${destination}`
-            : 'Choose pickup and destination to load route fares.'}
+            ? <span className="truncate">{pickupLocation} <span className="mx-1">→</span> {destination}</span>
+            : 'Choose pickup and destination...'}
         </div>
 
-        {isFareLoading ? (
-          <p className="mt-3 text-sm text-neutral-500">Calculating fares from backend...</p>
-        ) : null}
-
-        <div className="mt-4 space-y-2">
+        <div className="mt-stack-md space-y-3">
           {vehicleOptions.map((option) => (
             <button
               key={option.id}
@@ -134,48 +139,59 @@ const VehicleTypePanel = ({ pickupLocation, destination, pickupCoords, destinati
               onClick={() => {
                 setSelectedVehicle(option.id)
               }}
-              className={`flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition ${
+              className={`flex w-full items-center gap-4 rounded-2xl border px-4 py-4 text-left transition-all overflow-hidden relative ${
                 selectedVehicle === option.id
-                  ? 'bg-neutral-100 ring-1 ring-neutral-300'
-                  : 'hover:bg-neutral-50'
+                  ? 'bg-surface-container-lowest/80 border-primary-container shadow-[0_0_20px_rgba(0,229,255,0.15)]'
+                  : 'bg-surface-variant/20 border-outline/10 hover:bg-surface-variant/40'
               }`}
             >
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white">
+              {selectedVehicle === option.id && (
+                <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-primary-container shadow-[0_0_10px_#00E5FF]"></div>
+              )}
+              
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-gradient-to-b from-surface-container-lowest to-surface-variant shadow-inner">
                 {option.icon}
               </div>
 
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                  <p className="text-[1.45rem] font-semibold leading-tight text-black">{option.title}</p>
-                  <p className="text-base text-neutral-600">{option.capacity}</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-display-xs text-display-xs leading-tight text-on-surface tracking-wide">{option.title}</p>
+                  <div className="flex items-center gap-1 text-on-surface-variant/80 text-[12px] font-body-sm bg-surface-variant px-1.5 py-0.5 rounded-full">
+                    <span className="material-symbols-outlined text-[12px]">person</span>
+                    <span>{option.capacity}</span>
+                  </div>
                 </div>
 
-                <div className="mt-0.5 flex items-center gap-2 text-base text-neutral-700">
-                  <span>{option.eta}</span>
-                  {option.away ? <span>- {option.away}</span> : null}
+                <div className="mt-1 flex items-center gap-2 font-body-sm text-body-sm text-on-surface-variant/70">
+                  <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">map</span> {option.eta}</span>
+                  {option.away ? <span className="flex items-center gap-1">· <span className="material-symbols-outlined text-[14px]">schedule</span> {option.away}</span> : null}
                 </div>
 
                 {option.badge ? (
-                  <span className="mt-1 inline-flex rounded-md bg-blue-600 px-2 py-0.5 text-xs font-medium text-white">
+                  <span className="mt-1.5 inline-block rounded border border-[#00B8D4]/30 bg-[#00B8D4]/10 px-2 py-0.5 text-[10px] font-label-caps uppercase text-[#00B8D4]">
                     {option.badge}
                   </span>
                 ) : null}
               </div>
 
-              <p className="text-[1.35rem] font-semibold text-black">
-                {option.fare !== null ? `Rs ${option.fare}` : 'Fare unavailable'}
-              </p>
+              <div className="text-right flex flex-col items-end gap-1">
+                <p className="font-display-sm text-[20px] text-primary-container tracking-tighter">
+                  {option.fare !== null ? `₹${option.fare}` : '--'}
+                </p>
+                {isFareLoading && <p className="text-[10px] text-on-surface-variant animate-pulse font-label-caps">Loading</p>}
+              </div>
             </button>
           ))}
         </div>
 
-        <div className="mt-4 flex items-center justify-between gap-3 border-t border-neutral-200 pt-4">
+        <div className="mt-stack-lg pt-4 flex gap-3">
           <button
             type="button"
-            className="inline-flex h-12 w-12 items-center justify-center rounded-xl border border-neutral-300 bg-white text-neutral-700"
+            className="flex w-[60px] flex-col items-center justify-center rounded-xl border border-outline/20 bg-surface-container-lowest/60 text-on-surface hover:bg-surface-variant/40 transition"
             aria-label="Payment method"
           >
-            <IoCardOutline className="h-6 w-6" />
+            <span className="material-symbols-outlined text-[24px] mb-1 text-secondary-fixed">payments</span>
+            <span className="text-[10px] font-label-caps uppercase text-on-surface-variant">Cash</span>
           </button>
 
           <button
@@ -185,9 +201,10 @@ const VehicleTypePanel = ({ pickupLocation, destination, pickupCoords, destinati
               fare: selectedOption.fare,
             })}
             disabled={!selectedOption || selectedOption.fare === null || isFareLoading}
-            className="h-12 flex-1 rounded-xl bg-black text-[1.25rem] font-semibold text-white"
+            className="h-14 flex-1 rounded-xl bg-gradient-to-r from-primary-container to-[#00B8D4] font-label-caps text-label-caps text-on-primary-fixed uppercase tracking-widest shadow-[0_0_20px_rgba(0,229,255,0.25)] transition-all enabled:hover:shadow-[0_0_25px_rgba(0,229,255,0.4)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            Choose {selectedOption?.title || 'Ride'}
+            Book {selectedOption?.title || 'Ride'}
+            <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
           </button>
         </div>
       </div>

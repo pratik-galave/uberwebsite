@@ -189,13 +189,13 @@ const LiveTracking = ({ captainLocation, pickupCoords, destinationCoords, pickup
                 zoomControl={false}
             >
                 <TileLayer
-                    url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                    url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                     attribution="&copy; OpenStreetMap contributors &copy; CARTO"
                 />
                 {captainCoords ? <RecenterMap center={captainCoords} destination={effectiveDestination} /> : null}
                 {captainCoords ? <Marker position={[captainCoords.lat, captainCoords.lng]} /> : null}
                 {effectiveDestination ? <Marker position={[effectiveDestination.lat, effectiveDestination.lng]} /> : null}
-                {path.length > 0 ? <Polyline positions={path} color="#3b82f6" weight={5} opacity={0.8} /> : null}
+                {path.length > 0 ? <Polyline positions={path} color="#00E5FF" weight={4} opacity={0.8} /> : null}
             </MapContainer>
         </div>
     )

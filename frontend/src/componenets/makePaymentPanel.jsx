@@ -1,24 +1,41 @@
 import React from 'react'
-import { IoCashOutline, IoCheckmarkCircleOutline } from 'react-icons/io5'
 
 const MakePaymentPanel = ({ customerName, fare, onMakePayment, onDone, isPaymentDone = false }) => {
   return (
-    <section className="absolute inset-x-0 bottom-0 z-50 rounded-t-3xl bg-white shadow-[0_-12px_30px_rgba(0,0,0,0.24)]">
-      <div className="px-4 pb-5 pt-4">
-        <div className="mx-auto mb-3 h-1.5 w-14 rounded-full bg-neutral-300" />
+    <section className="absolute inset-x-0 bottom-0 z-50 rounded-t-3xl bg-surface-variant/40 border border-outline/20 shadow-[0_-20px_40px_rgba(0,0,0,0.6)] backdrop-blur-[40px] overflow-hidden">
+      {/* Subtle top edge highlight */}
+      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+      
+      {isPaymentDone && (
+        <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-[#00E676] to-transparent animate-pulse shadow-[0_0_15px_#00E676]"></div>
+      )}
 
-        <p className="text-sm font-medium text-neutral-500">Ride completed</p>
-        <p className="mt-1 text-2xl font-semibold tracking-tight text-black">Collect payment</p>
+      <div className="px-container-margin pb-6 pt-5">
+        <div className="mb-stack-md flex items-center justify-center">
+          <div className="h-1.5 w-14 rounded-full bg-outline/30" />
+        </div>
 
-        <div className="mt-4 rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
-          <div className="flex items-center justify-between">
-            <p className="text-base text-neutral-600">Customer</p>
-            <p className="text-base font-semibold text-black">{customerName}</p>
+        <div className="flex flex-col items-center justify-center text-center mb-stack-lg relative">
+          {/* Decorative background glow */}
+          <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150px] h-[150px] rounded-full blur-[40px] pointer-events-none transition-colors duration-500 ${isPaymentDone ? 'bg-[#00E676]/20' : 'bg-primary-container/20'}`}></div>
+          
+          <div className={`relative z-10 flex h-16 w-16 items-center justify-center rounded-full border mb-3 shadow-[0_0_20px_rgba(0,0,0,0.3)] transition-colors duration-500 ${isPaymentDone ? 'bg-gradient-to-br from-[#00E676]/20 to-surface-variant border-[#00E676]/30 text-[#00E676]' : 'bg-gradient-to-br from-primary-container/20 to-surface-variant border-primary-container/30 text-primary-container'}`}>
+            <span className="material-symbols-outlined text-[32px]">{isPaymentDone ? 'check_circle' : 'payments'}</span>
+          </div>
+          
+          <p className="font-label-caps text-[12px] uppercase tracking-widest text-on-surface-variant mb-1">Ride completed</p>
+          <p className="font-display-sm text-[24px] font-semibold tracking-tight text-on-surface leading-none">{isPaymentDone ? 'Payment Collected' : 'Collect Payment'}</p>
+        </div>
+
+        <div className="rounded-2xl border border-outline/10 bg-surface-container-lowest/40 p-4 relative overflow-hidden mb-stack-lg">
+          <div className="flex items-center justify-between border-b border-outline/10 pb-3">
+            <p className="font-label-caps text-[12px] uppercase tracking-widest text-on-surface-variant">Customer</p>
+            <p className="font-display-xs text-[16px] text-on-surface">{customerName}</p>
           </div>
 
-          <div className="mt-3 flex items-center justify-between border-t border-neutral-200 pt-3">
-            <p className="text-base text-neutral-600">Total fare</p>
-            <p className="text-2xl font-bold text-black">{fare}</p>
+          <div className="flex items-center justify-between pt-3">
+            <p className="font-label-caps text-[12px] uppercase tracking-widest text-on-surface-variant">Total fare</p>
+            <p className="font-display-md text-[32px] font-bold text-primary-container leading-none tracking-tighter">{fare}</p>
           </div>
         </div>
 
@@ -26,9 +43,9 @@ const MakePaymentPanel = ({ customerName, fare, onMakePayment, onDone, isPayment
           type="button"
           onClick={onMakePayment}
           disabled={isPaymentDone}
-          className="mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 text-lg font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-300"
+          className={`flex h-14 w-full items-center justify-center gap-2 rounded-xl text-background font-label-caps text-[14px] uppercase tracking-widest font-bold shadow-[0_0_20px_rgba(0,0,0,0.3)] transition-all ${isPaymentDone ? 'bg-surface-variant/50 text-on-surface/50 border border-outline/10 shadow-none' : 'bg-gradient-to-r from-primary-container to-[#00B8D4] shadow-[0_0_20px_rgba(0,229,255,0.3)] hover:shadow-[0_0_25px_rgba(0,229,255,0.5)]'}`}
         >
-          <IoCashOutline className="h-5 w-5" />
+          <span className="material-symbols-outlined text-[20px]">{isPaymentDone ? 'task_alt' : 'account_balance_wallet'}</span>
           {isPaymentDone ? 'Payment Successful' : 'Make Payment'}
         </button>
 
@@ -36,9 +53,9 @@ const MakePaymentPanel = ({ customerName, fare, onMakePayment, onDone, isPayment
           type="button"
           onClick={onDone}
           disabled={!isPaymentDone}
-          className="mt-3 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-black text-lg font-semibold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-500"
+          className={`mt-stack-sm flex h-14 w-full items-center justify-center gap-2 rounded-xl text-background font-label-caps text-[14px] uppercase tracking-widest font-bold shadow-[0_0_20px_rgba(0,0,0,0.3)] transition-all ${!isPaymentDone ? 'bg-surface-variant/50 text-on-surface/50 border border-outline/10 shadow-none' : 'bg-gradient-to-r from-[#00E676] to-[#00C853] shadow-[0_0_20px_rgba(0,230,118,0.3)] hover:shadow-[0_0_25px_rgba(0,230,118,0.5)]'}`}
         >
-          <IoCheckmarkCircleOutline className="h-5 w-5" />
+          <span className="material-symbols-outlined text-[20px]">{isPaymentDone ? 'done_all' : 'lock_clock'}</span>
           {isPaymentDone ? 'Finish Ride' : 'Complete payment first'}
         </button>
       </div>

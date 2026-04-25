@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { IoLogOutOutline } from 'react-icons/io5'
 import LiveTracking from '../componenets/liveTracking.jsx'
 import CustomerRequestPanel from '../componenets/customerRequestPanel.jsx'
 import CustomerInfoPanel from '../componenets/customerInfoPanel.jsx'
@@ -334,10 +333,13 @@ const CaptainHome = () => {
     : 'User contact details unavailable'
 
   return (
-    <main className="fixed inset-0 w-full overflow-hidden bg-neutral-100 text-black">
+    <main className="fixed inset-0 w-full overflow-hidden bg-background text-on-background antialiased">
       {locationWarning ? (
-        <div className="absolute left-4 right-4 top-4 z-40 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900 shadow-md">
-          {locationWarning}
+        <div className="absolute left-4 right-4 top-14 z-40 rounded-xl border border-error-container/50 bg-error-container/20 backdrop-blur-md px-4 py-3 text-sm font-medium text-error shadow-md">
+          <div className="flex items-start gap-2">
+            <span className="material-symbols-outlined text-[18px]">warning</span>
+            <p>{locationWarning}</p>
+          </div>
         </div>
       ) : null}
 
@@ -350,21 +352,21 @@ const CaptainHome = () => {
           destString={incomingRideRequest?.destination}
         />
       </div>
-      <div className="absolute inset-0 bg-linear-to-b from-white/10 via-transparent to-white/20 pointer-events-none z-10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent pointer-events-none z-10" />
 
       <Link
         to="/captain-logout"
         aria-label="Logout captain"
         title="Logout"
-        className="absolute right-4 top-4 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-white/95 text-black shadow-md backdrop-blur-sm transition hover:bg-white"
+        className="absolute right-4 top-6 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-surface-container-lowest border border-outline/20 text-on-surface shadow-[0_0_15px_rgba(0,0,0,0.5)] backdrop-blur-md transition hover:bg-surface-variant group"
       >
-        <IoLogOutOutline className="h-6 w-6" />
+        <span className="material-symbols-outlined text-[20px] group-hover:text-error transition-colors">logout</span>
       </Link>
 
       {!isRequestPanelOpen && !isCustomerInfoPanelOpen ? (
         <div className="absolute inset-x-0 bottom-0 z-30">
           <TotalEarningPanel
-            totalEarning={`Rs ${Math.floor(captainStats.earnings).toLocaleString('en-IN')}`}
+            totalEarning={`₹${Math.floor(captainStats.earnings).toLocaleString('en-IN')}`}
             changeLabel="+0% from last week"
             completedRides={`${captainStats.rides} rides`}
             onlineHours={formatTime(captainStats.onlineSeconds)}
@@ -372,8 +374,6 @@ const CaptainHome = () => {
           />
         </div>
       ) : null}
-
-
 
       {isRequestPanelOpen ? (
         <CustomerRequestPanel

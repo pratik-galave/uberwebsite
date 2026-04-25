@@ -430,18 +430,18 @@ const Home = () => {
   const hasDestinationValue = Boolean(destination)
 
   return (
-    <main className="fixed inset-0 w-full overflow-hidden bg-neutral-100 text-black">
+    <main className="fixed inset-0 w-full overflow-hidden bg-background text-on-background antialiased">
       {rideOtpInfo ? (
-        <section className="absolute left-4 right-4 top-4 z-60 rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-4 shadow-lg">
-          <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">Ride Accepted</p>
-          <p className="mt-1 text-sm text-emerald-900">
-            {rideOtpInfo.captainName} accepted your ride. Share this OTP with the captain.
+        <section className="absolute left-4 right-4 top-14 z-60 rounded-xl border border-secondary-fixed/50 bg-secondary-fixed/10 backdrop-blur-md px-4 py-4 shadow-[0_10px_30px_rgba(98,255,150,0.2)]">
+          <p className="font-label-caps text-label-caps text-secondary-fixed uppercase tracking-widest">Ride Accepted</p>
+          <p className="mt-1 font-body-sm text-body-sm text-on-surface">
+            {rideOtpInfo.captainName} accepted your ride. Share this OTP.
           </p>
-          <p className="mt-2 text-3xl font-bold tracking-[0.35em] text-emerald-900">{rideOtpInfo.otp}</p>
+          <p className="mt-2 text-4xl font-bold tracking-[0.35em] text-secondary-fixed text-center">{rideOtpInfo.otp}</p>
           <button
             type="button"
             onClick={() => setRideOtpInfo(null)}
-            className="mt-3 h-10 rounded-lg bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700"
+            className="mt-3 w-full h-10 rounded-lg bg-surface-variant/50 border border-outline/30 px-4 font-label-caps text-label-caps text-on-surface transition hover:bg-surface-variant"
           >
             Close
           </button>
@@ -459,33 +459,39 @@ const Home = () => {
              onDestinationChange={handleDestinationChange}
           />
         </div>
-        <div className="absolute inset-0 bg-linear-to-b from-white/15 via-white/5 to-white/20 pointer-events-none z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent pointer-events-none z-10" />
 
-        
-
-        
-        <div className="absolute inset-x-0 bottom-0 px-4 pb-4 z-20 pointer-events-none">
+        <div className="absolute inset-x-0 bottom-0 px-container-margin pb-6 z-20 pointer-events-none flex flex-col gap-4">
+          
           <button
             type="button"
             onClick={openPanel}
-            className="w-full rounded-3xl bg-white/95 px-5 py-5 text-left shadow-[0_18px_50px_rgba(0,0,0,0.16)] backdrop-blur-md pointer-events-auto"
+            className="w-full rounded-2xl bg-surface-variant/40 border border-outline/20 p-stack-lg text-left shadow-[0_20px_40px_rgba(0,0,0,0.6)] backdrop-blur-[40px] pointer-events-auto relative overflow-hidden"
           >
-            <h1 className="text-4xl font-semibold tracking-tight">Find a trip</h1>
+            {/* Subtle top edge highlight */}
+            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+            
+            <h1 className="font-display-md text-display-md text-primary-container tracking-tighter">Find a trip</h1>
 
-            <div className="mt-5 space-y-3">
+            <div className="mt-stack-md flex flex-col gap-3 relative">
+              {/* Connecting line */}
+              <div className="absolute left-[20px] top-[24px] bottom-[24px] w-[2px] bg-outline/30 z-0 border-l border-dashed border-outline/50"></div>
+              
               <div
-                className={`${inputBaseClasses} ${
-                  hasPickupValue ? 'border-neutral-300 bg-white text-neutral-900' : disabledLikeClasses
-                }`}
+                className={`relative z-10 flex items-center bg-surface-container-lowest/60 border border-outline/30 rounded-xl px-4 py-3 h-14 backdrop-blur-sm`}
               >
-                <span className="block w-full truncate">{pickupDisplayValue}</span>
+                <span className="material-symbols-outlined text-primary-container text-[20px] mr-3">radio_button_checked</span>
+                <span className={`block w-full truncate font-body-md text-body-md ${hasPickupValue ? 'text-on-surface' : 'text-on-surface-variant/50'}`}>
+                  {pickupDisplayValue}
+                </span>
               </div>
               <div
-                className={`${inputBaseClasses} ${
-                  hasDestinationValue ? 'border-neutral-300 bg-white text-neutral-900' : disabledLikeClasses
-                }`}
+                className={`relative z-10 flex items-center bg-surface-container-lowest/60 border border-outline/30 rounded-xl px-4 py-3 h-14 backdrop-blur-sm`}
               >
-                <span className="block w-full truncate">{destinationDisplayValue}</span>
+                <span className="material-symbols-outlined text-[#00B8D4] text-[20px] mr-3">location_on</span>
+                <span className={`block w-full truncate font-body-md text-body-md ${hasDestinationValue ? 'text-on-surface' : 'text-on-surface-variant/50'}`}>
+                  {destinationDisplayValue}
+                </span>
               </div>
             </div>
           </button>
@@ -500,23 +506,27 @@ const Home = () => {
             aria-hidden="true"
           />
 
-          <section className="absolute inset-0 z-20 flex flex-col overflow-hidden bg-white pointer-events-auto">
-        <div className="shrink-0 flex items-start justify-between px-5 pb-4 pt-6">
-          <h2 className="text-4xl font-semibold tracking-tight text-black">Find a trip</h2>
+          <section className="absolute inset-0 z-20 flex flex-col overflow-hidden bg-background pointer-events-auto">
+        <div className="shrink-0 flex items-center justify-between px-container-margin pb-4 pt-6 border-b border-outline/10 bg-surface-variant/20 backdrop-blur-md">
+          <h2 className="font-display-sm text-display-sm text-on-surface tracking-tight">Search Location</h2>
 
           <button
             type="button"
             onClick={closePanel}
             aria-label="Close trip panel"
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-900 shadow-sm transition hover:bg-neutral-50"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container-lowest border border-outline/20 text-on-surface shadow-sm transition hover:bg-surface-variant"
           >
-            <IoChevronDown className="h-5 w-5" />
+            <span className="material-symbols-outlined text-[20px]">close</span>
           </button>
         </div>
 
-        <div className="shrink-0 px-5 pb-4">
-          <div className="space-y-3 rounded-3xl border border-neutral-200 bg-white px-4 py-4 shadow-sm">
-            <div className="relative">
+        <div className="shrink-0 px-container-margin py-stack-md bg-surface-variant/10">
+          <div className="flex flex-col gap-3 relative">
+            {/* Connecting line */}
+            <div className="absolute left-[20px] top-[24px] bottom-[24px] w-[2px] border-l border-dashed border-outline/50 z-0"></div>
+            
+            <div className="relative z-10 flex items-center bg-surface-container-lowest/80 border border-outline/30 rounded-xl h-14 backdrop-blur-sm overflow-hidden focus-within:border-primary-container focus-within:ring-1 focus-within:ring-primary-container transition-colors">
+              <span className="material-symbols-outlined text-primary-container text-[20px] ml-4 mr-2">radio_button_checked</span>
               <input
                 ref={pickupInputRef}
                 value={pickupLocation}
@@ -526,11 +536,12 @@ const Home = () => {
                 }}
                 onFocus={() => setActiveField('pickup')}
                 onClick={() => openPanelForField('pickup')}
-                placeholder="Add a pick-up location"
-                className="h-14 w-full rounded-xl border border-amber-300 bg-white px-5 pl-10 text-base text-neutral-900 shadow-sm outline-none placeholder:text-neutral-500 focus:border-amber-400"
+                placeholder="Pick-up location"
+                className="flex-1 bg-transparent h-full text-on-surface font-body-md text-body-md outline-none placeholder:text-on-surface-variant/40 px-2"
               />
             </div>
-            <div className="relative">
+            <div className="relative z-10 flex items-center bg-surface-container-lowest/80 border border-outline/30 rounded-xl h-14 backdrop-blur-sm overflow-hidden focus-within:border-[#00B8D4] focus-within:ring-1 focus-within:ring-[#00B8D4] transition-colors">
+              <span className="material-symbols-outlined text-[#00B8D4] text-[20px] ml-4 mr-2">location_on</span>
               <input
                 ref={destinationInputRef}
                 value={destination}
@@ -540,14 +551,14 @@ const Home = () => {
                 }}
                 onFocus={() => setActiveField('destination')}
                 onClick={() => openPanelForField('destination')}
-                placeholder="Enter your destination"
-                className="h-14 w-full rounded-xl border border-neutral-200 bg-neutral-50 px-5 pl-10 text-base text-neutral-900 shadow-sm outline-none placeholder:text-neutral-500 focus:border-neutral-300"
+                placeholder="Where to?"
+                className="flex-1 bg-transparent h-full text-on-surface font-body-md text-body-md outline-none placeholder:text-on-surface-variant/40 px-2"
               />
             </div>
           </div>
         </div>
 
-        <div className="min-h-0 flex-1">
+        <div className="min-h-0 flex-1 overflow-y-auto hide-scrollbar bg-background">
           <LocationSearchPanel
             suggestions={locationSuggestions}
             isLoading={isSuggestionLoading}
@@ -555,14 +566,15 @@ const Home = () => {
           />
         </div>
 
-        <div className="shrink-0 border-t border-neutral-200 bg-white px-5 py-4">
+        <div className="shrink-0 border-t border-outline/20 bg-surface-variant/30 backdrop-blur-md px-container-margin py-4">
           <button
             type="button"
             onClick={handleProceedToVehicleSelection}
             disabled={!pickupLocation.trim() || !destination.trim()}
-            className="h-12 w-full rounded-xl bg-black text-[1.1rem] font-semibold text-white transition enabled:hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-300"
+            className="w-full rounded-xl bg-primary-container py-3.5 text-on-primary-fixed font-label-caps text-label-caps uppercase tracking-widest shadow-[0_0_15px_rgba(255,255,255,0.2)] transition-all enabled:hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none flex justify-center items-center gap-2"
           >
-            Continue
+            Confirm Locations
+            <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
           </button>
         </div>
       </section>

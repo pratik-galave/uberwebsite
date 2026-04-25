@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Velocity - Captain Signup</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#62ff96",
+                        "surface-variant": "#353436",
+                        "on-tertiary-fixed": "#20005f",
+                        "tertiary-fixed": "#e8deff",
+                        "surface-container-low": "#1c1b1c",
+                        "outline-variant": "#3b494c",
+                        "surface": "#131314",
+                        "surface-container-highest": "#353436",
+                        "secondary-fixed-dim": "#00e475",
+                        "error-container": "#93000a",
+                        "on-primary-fixed": "#001f24",
+                        "on-primary-fixed-variant": "#004f58",
+                        "outline": "#849396",
+                        "primary-fixed-dim": "#00daf3",
+                        "surface-bright": "#3a393a",
+                        "on-secondary-fixed-variant": "#005226",
+                        "secondary": "#7dffa2",
+                        "surface-container-lowest": "#0e0e0f",
+                        "secondary-container": "#05e777",
+                        "on-secondary-container": "#00622e",
+                        "inverse-primary": "#006875",
+                        "on-background": "#e5e2e3",
+                        "on-tertiary-fixed-variant": "#4f00d0",
+                        "on-secondary-fixed": "#00210b",
+                        "primary": "#c3f5ff",
+                        "on-primary": "#00363d",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-container": "#00626e",
+                        "surface-container-high": "#2a2a2b",
+                        "primary-container": "#00e5ff",
+                        "inverse-on-surface": "#313031",
+                        "on-surface": "#e5e2e3",
+                        "surface-dim": "#131314",
+                        "inverse-surface": "#e5e2e3",
+                        "on-surface-variant": "#bac9cc",
+                        "on-tertiary-container": "#622be5",
+                        "surface-tint": "#00daf3",
+                        "primary-fixed": "#9cf0ff",
+                        "tertiary-container": "#d6c9ff",
+                        "on-secondary": "#003918",
+                        "surface-container": "#201f20",
+                        "error": "#ffb4ab",
+                        "tertiary-fixed-dim": "#cdbdff",
+                        "background": "#131314",
+                        "on-tertiary": "#370096",
+                        "tertiary": "#f1e9ff",
+                        "on-error": "#690005"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "stack-md": "16px",
+                        "container-margin": "24px",
+                        "stack-sm": "8px",
+                        "safe-area-bottom": "44px",
+                        "gutter": "16px",
+                        "stack-lg": "32px"
+                    },
+                    "fontFamily": {
+                        "display-xl": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "data-mono": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-xl": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-caps": ["12px", { "lineHeight": "1.0", "letterSpacing": "0.1em", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "data-mono": ["14px", { "lineHeight": "1.0", "letterSpacing": "0.05em", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen relative overflow-x-hidden antialiased">
+<!-- Background Image Layer -->
+<div class="fixed inset-0 z-0">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="high-end luxury car interior steering wheel at night with blurred city lights in background" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDfuoTJJKPFdXg30Wt-KonPUTMiz_9AYJGqjNH6kJNR6Zn8SP1bKDE0LvX8iOFpX6PsiBy17_8s1EX2imt_QWwUaGCEbiIOkWTmRQJyelR4EqvrvlUOQYRhjPHUddXpPE5GXQJ5EPtkqeUCrUeeQrr1IGAb3YW-315cDYLltsGKuV27iRfFxA2xHa3tmHQXwLvAYc2Nv_yq-mB6bEx1Zyv8-RDeHIcu2gw2-jaDc2Mp_CYnGYDHRopWXY7QLsWkmku2Y5IwAzXPnLlg');"></div>
+<div class="absolute inset-0 bg-background/80 backdrop-blur-sm"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/50"></div>
+</div>
+<!-- Main Content -->
+<main class="relative z-10 flex flex-col items-center justify-center min-h-screen py-stack-lg px-container-margin">
+<!-- Brand Header -->
+<div class="mb-stack-lg text-center">
+<h1 class="font-display-xl text-display-xl text-primary-fixed tracking-tighter uppercase">Velocity</h1>
+<p class="font-label-caps text-label-caps text-primary mt-unit">Captain Application</p>
+</div>
+<!-- Glassmorphic Form Container -->
+<div class="w-full max-w-2xl bg-surface/70 backdrop-blur-2xl rounded-xl border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)] overflow-hidden relative">
+<!-- Subtle Top Light Edge -->
+<div class="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary-container/30 to-transparent"></div>
+<div class="p-container-margin md:p-stack-lg space-y-stack-lg">
+<!-- Intro -->
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-unit">Join the Elite Fleet</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Provide your details to begin the verification process.</p>
+</div>
+<form class="space-y-stack-lg">
+<!-- Section: Personal Info -->
+<div class="space-y-stack-md relative">
+<div class="flex items-center gap-unit mb-stack-md">
+<span class="material-symbols-outlined text-primary-container">person</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Personal Details</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<div class="flex flex-col gap-unit">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase">First Name</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-DEFAULT px-4 py-3 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all" placeholder="Enter first name" type="text"/>
+</div>
+<div class="flex flex-col gap-unit">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Last Name</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-DEFAULT px-4 py-3 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all" placeholder="Enter last name" type="text"/>
+</div>
+</div>
+<div class="flex flex-col gap-unit">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Email Address</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-DEFAULT px-4 py-3 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all" placeholder="name@example.com" type="email"/>
+</div>
+</div>
+<hr class="border-outline-variant/30"/>
+<!-- Section: Vehicle Details -->
+<div class="space-y-stack-md relative">
+<div class="flex items-center gap-unit mb-stack-md">
+<span class="material-symbols-outlined text-primary-container">directions_car</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Vehicle Information</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<div class="flex flex-col gap-unit">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Make</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-DEFAULT px-4 py-3 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all" placeholder="e.g. Mercedes-Benz" type="text"/>
+</div>
+<div class="flex flex-col gap-unit">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Model</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-DEFAULT px-4 py-3 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all" placeholder="e.g. S-Class" type="text"/>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-gutter">
+<div class="flex flex-col gap-unit">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase">Year</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-DEFAULT px-4 py-3 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all" placeholder="YYYY" type="text"/>
+</div>
+<div class="flex flex-col gap-unit">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase">License Plate</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-DEFAULT px-4 py-3 font-data-mono text-data-mono text-primary focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all" placeholder="XXX-XXXX" type="text"/>
+</div>
+</div>
+</div>
+<hr class="border-outline-variant/30"/>
+<!-- Section: Document Upload -->
+<div class="space-y-stack-md">
+<div class="flex items-center gap-unit mb-stack-md">
+<span class="material-symbols-outlined text-primary-container">badge</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">License Verification</h3>
+</div>
+<div class="border-2 border-dashed border-outline-variant bg-surface-container-lowest/50 rounded-lg p-stack-lg flex flex-col items-center justify-center text-center cursor-pointer hover:border-primary-container hover:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined text-[48px] text-on-surface-variant mb-unit" style="font-variation-settings: 'wght' 200;">cloud_upload</span>
+<p class="font-body-lg text-body-lg text-on-surface mb-unit">Upload Driver's License</p>
+<p class="font-body-md text-body-md text-on-surface-variant">Drag and drop or click to browse (JPEG, PNG, PDF)</p>
+</div>
+</div>
+<!-- Submit Action -->
+<div class="pt-stack-md">
+<button class="w-full bg-primary-container text-on-primary-container font-headline-md text-headline-md rounded-lg py-4 shadow-[0_0_20px_rgba(0,229,255,0.2)] hover:shadow-[0_0_30px_rgba(0,229,255,0.4)] hover:bg-primary-fixed transition-all flex items-center justify-center gap-stack-sm" type="button">
+                            Submit Application
+                            <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</form>
+</div>
+</div>
+<!-- Minimal Footer -->
+<div class="mt-stack-lg text-center">
+<p class="font-body-md text-body-md text-on-surface-variant">Already a Captain? <a class="text-primary hover:text-primary-fixed transition-colors" href="#">Sign in</a></p>
+</div>
+</main>
+</body></html>

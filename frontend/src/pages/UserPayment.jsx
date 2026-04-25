@@ -26,7 +26,7 @@ const UserPayment = () => {
     }
   }, [location.state])
 
-  const fareDisplay = rideMeta.fare != null ? `Rs ${rideMeta.fare}` : 'Fare pending'
+  const fareDisplay = rideMeta.fare != null ? `₹${rideMeta.fare}` : 'Fare pending'
 
   const handleMakePayment = () => {
     setIsPaymentDone(true)
@@ -43,8 +43,10 @@ const UserPayment = () => {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-neutral-100 text-black">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.95),rgba(245,245,245,0.9))]" />
+    <main className="relative min-h-screen overflow-hidden bg-background text-on-background antialiased">
+      {/* Abstract Background Gradients */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary-container/10 blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-on-tertiary-container/5 blur-[150px] rounded-full pointer-events-none"></div>
 
       <div className="relative mx-auto flex min-h-screen w-full max-w-md items-end">
         <MakePaymentPanel
