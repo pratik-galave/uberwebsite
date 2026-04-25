@@ -60,10 +60,27 @@ export async function getfare(pickup, destination, pickupLat, pickupLng, destLat
         };
 
         
+        const formatDuration = (minutes) => {
+            if (minutes < 1) return '1 min';
+            const h = Math.floor(minutes / 60);
+            const m = Math.round(minutes % 60);
+            return h > 0 ? `${h}h ${m}m` : `${m} min`;
+        };
+
+        const vehicleDurations = {
+            car: durationInMinutes,
+            auto: durationInMinutes * 1.1,
+            bike: durationInMinutes * 0.8
+        };
+
         return {
             car: calculateFare('car'),
             auto: calculateFare('auto'),
-            bike: calculateFare('bike')
+            bike: calculateFare('bike'),
+            carDuration: formatDuration(vehicleDurations.car),
+            autoDuration: formatDuration(vehicleDurations.auto),
+            bikeDuration: formatDuration(vehicleDurations.bike),
+            distance: distance?.text || 'Unavailable'
         };
     } else {
         throw new Error('Pickup and destination are required to calculate fare');

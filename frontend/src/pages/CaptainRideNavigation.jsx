@@ -8,7 +8,13 @@ import LiveTracking from '../componenets/liveTracking.jsx'
 const CaptainRideNavigation = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const [isRideStarted, setIsRideStarted] = useState(false)
+  const [isRideStarted, setIsRideStarted] = useState(() => {
+    return localStorage.getItem('isRideStarted') === 'true'
+  })
+  const [rideStartTime, setRideStartTime] = useState(() => {
+    const stored = localStorage.getItem('rideStartTime')
+    return stored ? parseInt(stored, 10) : null
+  })
   const [captainLocation, setCaptainLocation] = useState(null)
   const [isPanelOpen, setIsPanelOpen] = useState(true)
   const [touchStartY, setTouchStartY] = useState(0)
@@ -143,6 +149,10 @@ const CaptainRideNavigation = () => {
     }
 
     setIsRideStarted(true)
+    const startTime = Date.now()
+    setRideStartTime(startTime)
+    localStorage.setItem('isRideStarted', 'true')
+    localStorage.setItem('rideStartTime', startTime.toString())
   }
 
   const handleRideCompleted = () => {
@@ -159,11 +169,28 @@ const CaptainRideNavigation = () => {
 
     // Update captain stats
     try {
+      const today = new Date().toLocaleDateString('en-CA')
       const statsStr = localStorage.getItem('captainStats')
-      const stats = statsStr ? JSON.parse(statsStr) : { earnings: 0, rides: 0, onlineSeconds: 0 }
-      const newFare = Number(rideMeta?.fare) || 120 // Fallback to 120 if fare not available
+      const stats = statsStr ? JSON.parse(statsStr) : { earnings: 0, rides: 0, onlineSeconds: 0, lastResetDate: today }
+      
+      // If stats are from a previous day, reset them first
+      if (stats.lastResetDate !== today) {
+        stats.earnings = 0
+        stats.rides = 0
+        stats.onlineSeconds = 0
+        stats.lastResetDate = today
+      }
+
+      const newFare = Number(rideMeta?.fare) || 120
       stats.earnings += newFare
       stats.rides += 1
+      
+      // Calculate and add ride duration
+      if (rideStartTime) {
+        const durationInSeconds = Math.floor((Date.now() - rideStartTime) / 1000)
+        stats.onlineSeconds += durationInSeconds
+      }
+      
       localStorage.setItem('captainStats', JSON.stringify(stats))
     } catch (err) {
       console.error('Failed to update stats on ride completion:', err)
@@ -171,6 +198,8 @@ const CaptainRideNavigation = () => {
 
     localStorage.removeItem('activeCaptainRideId')
     localStorage.removeItem('activeCaptainRideMeta')
+    localStorage.removeItem('isRideStarted')
+    localStorage.removeItem('rideStartTime')
 
     navigate('/captain-home')
   }
@@ -186,7 +215,7 @@ const CaptainRideNavigation = () => {
   }
 
   return (
-    <main className="relative h-screen w-full overflow-hidden bg-neutral-100 text-black">
+    <main className="fixed inset-0 w-full overflow-hidden bg-neutral-100 text-black">
       <div className="absolute inset-0">
         <LiveTracking
           captainLocation={captainLocation}

@@ -2,10 +2,10 @@ import React from 'react'
 import { IoTrendingUpOutline, IoCarSportOutline, IoTimeOutline } from 'react-icons/io5'
 
 const TotalEarningPanel = ({
-  totalEarning = 'Rs 4,250',
-  changeLabel = '+12% from last week',
-  completedRides = '18 rides',
-  onlineHours = '7h 20m',
+  totalEarning = 'Rs 0',
+  changeLabel = '+0% from last week',
+  completedRides = '0 rides',
+  onlineHours = '0h 00m',
   captainName = 'Captain',
   captainImage = null,
 }) => {

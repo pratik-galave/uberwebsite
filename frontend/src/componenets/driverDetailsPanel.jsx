@@ -4,19 +4,18 @@ import { Link } from 'react-router-dom'
 
 const DriverDetailsPanel = ({ driverName, driverImage, vehicleName, vehicleNumber, rating, vehicleImage, address, onMessage, onSafety, onShareTrip, onCall, onClose }) => {
   return (
-    <section className="absolute inset-0 z-50 flex items-end bg-black/20 backdrop-blur-[1px]">
-      <div className="w-full overflow-hidden rounded-t-4xl bg-white shadow-[0_-12px_30px_rgba(0,0,0,0.24)]">
-        <div className="px-4 pb-6 pt-4">
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex-1" />
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-neutral-100"
-            >
-              <IoClose className="h-6 w-6 text-black" />
-            </button>
-          </div>
+    <div className="w-full overflow-hidden rounded-t-4xl bg-white shadow-[0_-12px_30px_rgba(0,0,0,0.24)]">
+      <div className="px-4 pb-6 pt-4">
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex-1" />
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-neutral-100"
+          >
+            <IoClose className="h-6 w-6 text-black" />
+          </button>
+        </div>
 
           <div className="flex items-start gap-4">
             <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full border-2 border-neutral-200 bg-neutral-100">
@@ -117,9 +116,8 @@ const DriverDetailsPanel = ({ driverName, driverImage, vehicleName, vehicleNumbe
           >
             Make a Payment
           </Link>
-        </div>
       </div>
-    </section>
+    </div>
   )
 }
 

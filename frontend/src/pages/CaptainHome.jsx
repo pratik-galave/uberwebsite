@@ -20,26 +20,51 @@ const CaptainHome = () => {
   
   // Add state for captain statistics
   const [captainStats, setCaptainStats] = useState(() => {
+    const today = new Date().toLocaleDateString('en-CA')
     const stored = localStorage.getItem('captainStats')
     if (stored) {
       try { 
-        return JSON.parse(stored) 
+        const stats = JSON.parse(stored)
+        // If it's a new day, reset stats
+        if (stats.lastResetDate !== today) {
+          return { earnings: 0, rides: 0, onlineSeconds: 0, lastResetDate: today }
+        }
+        return stats
       } catch (error) {
         console.error('Failed to parse captain stats:', error)
       }
     }
-    return { earnings: 0, rides: 0, onlineSeconds: 0 } // Start at 0 instead of dummy data
+    return { earnings: 0, rides: 0, onlineSeconds: 0, lastResetDate: today }
   })
 
-  // Timer to increment online time every minute
+  // Check and reset stats at midnight
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCaptainStats(prev => {
-        const next = { ...prev, onlineSeconds: prev.onlineSeconds + 60 }
-        localStorage.setItem('captainStats', JSON.stringify(next))
-        return next
-      })
-    }, 60000)
+    const checkAndResetStats = () => {
+      const today = new Date().toLocaleDateString('en-CA') // YYYY-MM-DD
+      const stored = localStorage.getItem('captainStats')
+      
+      if (stored) {
+        try {
+          const stats = JSON.parse(stored)
+          if (stats.lastResetDate !== today) {
+            const resetStats = { earnings: 0, rides: 0, onlineSeconds: 0, lastResetDate: today }
+            setCaptainStats(resetStats)
+            localStorage.setItem('captainStats', JSON.stringify(resetStats))
+          }
+        } catch (error) {
+          console.error('Failed to reset captain stats:', error)
+        }
+      } else {
+        const initialStats = { earnings: 0, rides: 0, onlineSeconds: 0, lastResetDate: today }
+        setCaptainStats(initialStats)
+        localStorage.setItem('captainStats', JSON.stringify(initialStats))
+      }
+    }
+
+    checkAndResetStats()
+    
+    // Also check every minute in case the app stays open overnight
+    const interval = setInterval(checkAndResetStats, 60000)
     return () => clearInterval(interval)
   }, [])
 
@@ -309,7 +334,7 @@ const CaptainHome = () => {
     : 'User contact details unavailable'
 
   return (
-    <main className="relative h-screen w-full overflow-hidden bg-neutral-100 text-black">
+    <main className="fixed inset-0 w-full overflow-hidden bg-neutral-100 text-black">
       {locationWarning ? (
         <div className="absolute left-4 right-4 top-4 z-40 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900 shadow-md">
           {locationWarning}

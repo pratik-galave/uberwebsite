@@ -5,7 +5,11 @@ import { IoArrowBack, IoCardOutline } from 'react-icons/io5'
 
 const VehicleTypePanel = ({ pickupLocation, destination, pickupCoords, destinationCoords, onBack, onSelectVehicle }) => {
   const [selectedVehicle, setSelectedVehicle] = useState('car')
-  const [fareByVehicle, setFareByVehicle] = useState({ car: null, auto: null, bike: null })
+  const [fareByVehicle, setFareByVehicle] = useState({ 
+    car: null, auto: null, bike: null, 
+    carDuration: null, autoDuration: null, bikeDuration: null,
+    distance: null 
+  })
   const [isFareLoading, setIsFareLoading] = useState(false)
 
   useEffect(() => {
@@ -38,6 +42,10 @@ const VehicleTypePanel = ({ pickupLocation, destination, pickupCoords, destinati
             car: response.data?.car ?? null,
             auto: response.data?.auto ?? null,
             bike: response.data?.bike ?? null,
+            carDuration: response.data?.carDuration ?? null,
+            autoDuration: response.data?.autoDuration ?? null,
+            bikeDuration: response.data?.bikeDuration ?? null,
+            distance: response.data?.distance ?? null,
           })
         }
       } catch {
@@ -64,8 +72,8 @@ const VehicleTypePanel = ({ pickupLocation, destination, pickupCoords, destinati
       icon: <FaCarSide className="h-8 w-8 text-neutral-800" />,
       title: 'Car',
       capacity: '4',
-      eta: '4 min away',
-      away: '4 min away',
+      eta: fareByVehicle.distance || '...',
+      away: fareByVehicle.carDuration || 'Calculating...',
       badge: 'Faster',
       fare: fareByVehicle.car,
     },
@@ -74,8 +82,8 @@ const VehicleTypePanel = ({ pickupLocation, destination, pickupCoords, destinati
       icon: <FaTaxi className="h-8 w-8 text-amber-500" />,
       title: 'Auto',
       capacity: '3',
-      eta: '5 min away',
-      away: '5 min away',
+      eta: fareByVehicle.distance || '...',
+      away: fareByVehicle.autoDuration || 'Calculating...',
       badge: '',
       fare: fareByVehicle.auto,
     },
@@ -84,8 +92,8 @@ const VehicleTypePanel = ({ pickupLocation, destination, pickupCoords, destinati
       icon: <FaMotorcycle className="h-8 w-8 text-neutral-700" />,
       title: 'Bike',
       capacity: '1',
-      eta: '3 min away',
-      away: '3 min away',
+      eta: fareByVehicle.distance || '...',
+      away: fareByVehicle.bikeDuration || 'Calculating...',
       badge: '',
       fare: fareByVehicle.bike,
     },

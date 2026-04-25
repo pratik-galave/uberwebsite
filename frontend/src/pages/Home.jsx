@@ -1,5 +1,4 @@
-import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import gsap from 'gsap'
+import { useContext, useEffect, useRef, useState } from 'react'
 import axios from 'axios'
 import { IoChevronDown } from 'react-icons/io5'
 import { useNavigate } from 'react-router-dom'
@@ -32,18 +31,6 @@ const Home = () => {
   const [selectedVehicle, setSelectedVehicle] = useState(null)
   const pickupInputRef = useRef(null)
   const destinationInputRef = useRef(null)
-  const landingRef = useRef(null)
-  const panelRef = useRef(null)
-  const backdropRef = useRef(null)
-  const vehiclePanelRef = useRef(null)
-  const confirmPanelRef = useRef(null)
-  const findingPanelRef = useRef(null)
-  const driverDetailsPanelRef = useRef(null)
-  const didMountRef = useRef(false)
-  const didMountVehicleRef = useRef(false)
-  const didMountConfirmRef = useRef(false)
-  const didMountFindingRef = useRef(false)
-  const didMountDriverRef = useRef(false)
 
   const {sendMessageToEvent, receiveMessageFromEvent, isConnected} = useContext(SocketDataContext)
   const {userData} = useContext(UserDataContext)
@@ -193,166 +180,6 @@ const Home = () => {
     }
   }, [activeField, isPanelOpen])
 
-  useLayoutEffect(() => {
-    gsap.set(landingRef.current, { scale: 1, opacity: 1 })
-    gsap.set(panelRef.current, { yPercent: 100, opacity: 0 })
-    gsap.set(backdropRef.current, { opacity: 0 })
-    gsap.set(vehiclePanelRef.current, { yPercent: 110, opacity: 0 })
-    gsap.set(confirmPanelRef.current, { yPercent: 110, opacity: 0 })
-    gsap.set(findingPanelRef.current, { yPercent: 110, opacity: 0 })
-    gsap.set(driverDetailsPanelRef.current, { yPercent: 110, opacity: 0 })
-  }, [])
-
-  useEffect(() => {
-    if (!didMountRef.current) {
-      didMountRef.current = true
-      return
-    }
-
-    gsap.killTweensOf([landingRef.current, panelRef.current, backdropRef.current])
-
-    if (isPanelOpen) {
-      const openTimeline = gsap.timeline()
-
-      openTimeline.to(landingRef.current, {
-        scale: 1.03,
-        opacity: 0.15,
-        duration: 0.35,
-        ease: 'power3.out',
-      }, 0)
-      openTimeline.to(backdropRef.current, {
-        opacity: 1,
-        duration: 0.35,
-        ease: 'power2.out',
-      }, 0)
-      openTimeline.to(panelRef.current, {
-        yPercent: 0,
-        opacity: 1,
-        duration: 0.55,
-        ease: 'power4.out',
-      }, 0)
-    } else {
-      const closeTimeline = gsap.timeline()
-
-      closeTimeline.to(panelRef.current, {
-        yPercent: 100,
-        opacity: 0,
-        duration: 0.45,
-        ease: 'power4.in',
-      }, 0)
-      closeTimeline.to(backdropRef.current, {
-        opacity: 0,
-        duration: 0.3,
-        ease: 'power2.out',
-      }, 0)
-      closeTimeline.to(landingRef.current, {
-        scale: 1,
-        opacity: 1,
-        duration: 0.35,
-        ease: 'power2.out',
-      }, 0.05)
-    }
-  }, [isPanelOpen])
-
-  useEffect(() => {
-    if (!didMountVehicleRef.current) {
-      didMountVehicleRef.current = true
-      return
-    }
-
-    gsap.killTweensOf(vehiclePanelRef.current)
-
-    if (isVehiclePanelOpen) {
-      gsap.to(vehiclePanelRef.current, {
-        yPercent: 0,
-        opacity: 1,
-        duration: 0.5,
-        ease: 'power4.out',
-      })
-    } else {
-      gsap.to(vehiclePanelRef.current, {
-        yPercent: 110,
-        opacity: 0,
-        duration: 0.35,
-        ease: 'power3.in',
-      })
-    }
-  }, [isVehiclePanelOpen])
-
-  useEffect(() => {
-    if (!didMountConfirmRef.current) {
-      didMountConfirmRef.current = true
-      return
-    }
-
-    gsap.killTweensOf(confirmPanelRef.current)
-
-    if (isConfirmPanelOpen) {
-      gsap.to(confirmPanelRef.current, {
-        yPercent: 0,
-        opacity: 1,
-        duration: 0.55,
-        ease: 'power4.out',
-      })
-    } else {
-      gsap.to(confirmPanelRef.current, {
-        yPercent: 110,
-        opacity: 0,
-        duration: 0.35,
-        ease: 'power3.in',
-      })
-    }
-  }, [isConfirmPanelOpen])
-
-  useEffect(() => {
-    if (!didMountDriverRef.current) {
-      didMountDriverRef.current = true
-      return
-    }
-
-    gsap.killTweensOf(driverDetailsPanelRef.current)
-
-    if (isDriverDetailsPanelOpen) {
-      gsap.to(driverDetailsPanelRef.current, {
-        yPercent: 0,
-        opacity: 1,
-        duration: 0.55,
-        ease: 'power4.out',
-      })
-    } else {
-      gsap.to(driverDetailsPanelRef.current, {
-        yPercent: 110,
-        opacity: 0,
-        duration: 0.35,
-        ease: 'power3.in',
-      })
-    }
-  }, [isDriverDetailsPanelOpen])
-
-  useEffect(() => {
-    if (!didMountFindingRef.current) {
-      didMountFindingRef.current = true
-      return
-    }
-
-    gsap.killTweensOf(findingPanelRef.current)
-
-    if (isFindingPanelOpen) {
-      gsap.to(findingPanelRef.current, {
-        yPercent: 0,
-        opacity: 1,
-        duration: 0.55,
-        ease: 'power4.out',
-      })
-    } else {
-      gsap.to(findingPanelRef.current, {
-        yPercent: 110,
-        opacity: 0,
-        duration: 0.35,
-        ease: 'power3.in',
-      })
-    }
-  }, [isFindingPanelOpen])
 
   useEffect(() => {
     if (!isPanelOpen) {
@@ -603,7 +430,7 @@ const Home = () => {
   const hasDestinationValue = Boolean(destination)
 
   return (
-    <main className="relative h-screen w-full overflow-hidden bg-neutral-100 text-black">
+    <main className="fixed inset-0 w-full overflow-hidden bg-neutral-100 text-black">
       {rideOtpInfo ? (
         <section className="absolute left-4 right-4 top-4 z-60 rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-4 shadow-lg">
           <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">Ride Accepted</p>
@@ -621,7 +448,7 @@ const Home = () => {
         </section>
       ) : null}
 
-      <div ref={landingRef} className="absolute inset-0">
+      <div className="absolute inset-0">
         <div className="absolute inset-0 z-0">
           <InteractiveMap 
              pickupCoords={pickupCoords} 
@@ -665,20 +492,15 @@ const Home = () => {
         </div>
       </div>
 
-      <div
-        ref={backdropRef}
-        className="absolute inset-0 z-10 bg-black/10"
-        style={{ pointerEvents: isPanelOpen ? 'auto' : 'none' }}
-        onClick={closePanel}
-        aria-hidden="true"
-      />
+      {isPanelOpen ? (
+        <>
+          <div
+            className="absolute inset-0 z-10 bg-black/10 pointer-events-auto"
+            onClick={closePanel}
+            aria-hidden="true"
+          />
 
-      <section
-        ref={panelRef}
-        aria-hidden={!isPanelOpen}
-        className="absolute inset-0 z-20 flex h-full flex-col overflow-hidden bg-white"
-        style={{ pointerEvents: isPanelOpen ? 'auto' : 'none' }}
-      >
+          <section className="absolute inset-0 z-20 flex flex-col overflow-hidden bg-white pointer-events-auto">
         <div className="shrink-0 flex items-start justify-between px-5 pb-4 pt-6">
           <h2 className="text-4xl font-semibold tracking-tight text-black">Find a trip</h2>
 
@@ -744,27 +566,31 @@ const Home = () => {
           </button>
         </div>
       </section>
+        </>
+      ) : null}
 
-      <div
-        ref={vehiclePanelRef}
-        className="absolute inset-x-0 bottom-0"
-        style={{ pointerEvents: isVehiclePanelOpen ? 'auto' : 'none' }}
-      >
-        <VehicleTypePanel
-          pickupLocation={pickupLocation}
-          destination={destination}
-          pickupCoords={pickupCoords}
-          destinationCoords={destinationCoords}
-          onBack={handleBackToLocationPanel}
-          onSelectVehicle={handleVehicleSelect}
+      {isVehiclePanelOpen ? (
+        <div className="absolute inset-x-0 bottom-0 pointer-events-auto">
+          <VehicleTypePanel
+            pickupLocation={pickupLocation}
+            destination={destination}
+            pickupCoords={pickupCoords}
+            destinationCoords={destinationCoords}
+            onBack={handleBackToLocationPanel}
+            onSelectVehicle={handleVehicleSelect}
+          />
+        </div>
+      ) : null}
+
+      {isConfirmPanelOpen || isFindingPanelOpen || isDriverDetailsPanelOpen ? (
+        <div
+          className="absolute inset-0 z-30 bg-black/20 backdrop-blur-[1px] pointer-events-auto"
+          aria-hidden="true"
         />
-      </div>
+      ) : null}
 
-      <div
-        ref={confirmPanelRef}
-        className="absolute inset-0 z-40"
-        style={{ pointerEvents: isConfirmPanelOpen ? 'auto' : 'none' }}
-      >
+      {isConfirmPanelOpen ? (
+        <div className="absolute inset-x-0 bottom-0 z-40 pointer-events-auto">
         <ConfirmRidePanel
           pickupLocation={pickupLocation}
           destination={destination}
@@ -779,13 +605,11 @@ const Home = () => {
             setIsVehiclePanelOpen(true)
           }}
         />
-      </div>
+        </div>
+      ) : null}
 
-      <div
-        ref={findingPanelRef}
-        className="absolute inset-0 z-40"
-        style={{ pointerEvents: isFindingPanelOpen ? 'auto' : 'none' }}
-      >
+      {isFindingPanelOpen ? (
+        <div className="absolute inset-x-0 bottom-0 z-40 pointer-events-auto">
         <VehicleFindingPanel
           pickupLocation={pickupLocation}
           destination={destination}
@@ -794,13 +618,11 @@ const Home = () => {
           onFoundDriver={handleFoundDriver}
           onClose={() => setIsFindingPanelOpen(false)}
         />
-      </div>
+        </div>
+      ) : null}
 
-      <div
-        ref={driverDetailsPanelRef}
-        className="absolute inset-0 z-50"
-        style={{ pointerEvents: isDriverDetailsPanelOpen ? 'auto' : 'none' }}
-      >
+      {isDriverDetailsPanelOpen ? (
+        <div className="absolute inset-x-0 bottom-0 z-40 pointer-events-auto">
         <DriverDetailsPanel
           driverName="Santh"
           driverImage={null}
@@ -815,7 +637,8 @@ const Home = () => {
           onCall={() => console.log('Call driver')}
           onClose={() => setIsDriverDetailsPanelOpen(false)}
         />
-      </div>
+        </div>
+      ) : null}
     </main>
   )
 }

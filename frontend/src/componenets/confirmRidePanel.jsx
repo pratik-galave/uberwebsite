@@ -14,10 +14,9 @@ const ConfirmRidePanel = ({
   errorMessage = '',
 }) => {
   return (
-    <section className="absolute inset-0 z-40 flex items-end bg-black/20 backdrop-blur-[1px]">
-      <div className="w-full overflow-hidden rounded-t-4xl bg-white shadow-[0_-12px_30px_rgba(0,0,0,0.24)]">
-        <div className="px-4 pb-4 pt-3">
-          <div className="mx-auto mb-3 h-1.5 w-14 rounded-full bg-neutral-300" />
+    <div className="w-full overflow-hidden rounded-t-4xl bg-white shadow-[0_-12px_30px_rgba(0,0,0,0.24)]">
+      <div className="px-4 pb-4 pt-3">
+        <div className="mx-auto mb-3 h-1.5 w-14 rounded-full bg-neutral-300" />
 
           <div className="mb-4 flex items-center gap-2">
             {onBack && (
@@ -108,9 +107,8 @@ const ConfirmRidePanel = ({
               {errorMessage}
             </p>
           ) : null}
-        </div>
       </div>
-    </section>
+    </div>
   )
 }
 
