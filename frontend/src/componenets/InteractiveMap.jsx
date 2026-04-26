@@ -118,7 +118,7 @@ const InteractiveMap = ({
 
         const resolveMissingCoordinates = async () => {
             if (normalizeCoords(pickupCoords)) {
-                setResolvedPickup(null);
+                if (!cancelled) setResolvedPickup(null);
             } else {
                 const pickupFromAddress = await resolveAddress(pickupString);
                 if (!cancelled) {
@@ -127,7 +127,7 @@ const InteractiveMap = ({
             }
 
             if (normalizeCoords(destinationCoords)) {
-                setResolvedDestination(null);
+                if (!cancelled) setResolvedDestination(null);
             } else {
                 const destinationFromAddress = await resolveAddress(destinationString);
                 if (!cancelled) {
@@ -136,10 +136,13 @@ const InteractiveMap = ({
             }
         };
 
-        resolveMissingCoordinates();
+        const timerId = setTimeout(() => {
+            resolveMissingCoordinates();
+        }, 1500); // 1.5 second debounce to respect Nominatim rate limits
 
         return () => {
             cancelled = true;
+            clearTimeout(timerId);
         };
     }, [pickupCoords, destinationCoords, pickupString, destinationString]);
 

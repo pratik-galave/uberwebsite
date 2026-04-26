@@ -4,7 +4,7 @@ import axios from 'axios'
 const vehicleOptions = [
   { id: 'car', title: 'Velocity Car', desc: 'Comfortable sedan', icon: 'directions_car', capacity: '4 seats', eta: '3 min' },
   { id: 'auto', title: 'Velocity Auto', desc: 'Quick & economical', icon: 'electric_rickshaw', capacity: '3 seats', eta: '2 min' },
-  { id: 'motorcycle', title: 'Velocity Moto', desc: 'Fastest option', icon: 'two_wheeler', capacity: '1 seat', eta: '1 min' },
+  { id: 'bike', title: 'Velocity Moto', desc: 'Fastest option', icon: 'two_wheeler', capacity: '1 seat', eta: '1 min' },
 ]
 
 const VehicleTypePanel = ({ pickupLocation, destination, pickupCoords, destinationCoords, onBack, onSelectVehicle }) => {
@@ -19,7 +19,14 @@ const VehicleTypePanel = ({ pickupLocation, destination, pickupCoords, destinati
       try {
         setIsLoading(true)
         const response = await axios.get(`${baseUrl}/ride/get-fare`, {
-          params: { origin: pickupLocation, destination },
+          params: { 
+            pickup: pickupLocation, 
+            destination,
+            pickupLat: pickupCoords?.lat,
+            pickupLng: pickupCoords?.lng,
+            destLat: destinationCoords?.lat,
+            destLng: destinationCoords?.lng
+          },
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         })
         if (response.data) setFares(response.data)

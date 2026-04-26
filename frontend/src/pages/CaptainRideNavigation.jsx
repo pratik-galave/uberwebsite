@@ -16,6 +16,7 @@ const CaptainRideNavigation = () => {
   })
   const [captainLocation, setCaptainLocation] = useState(null)
   const [isPanelOpen, setIsPanelOpen] = useState(true)
+  const [showQR, setShowQR] = useState(false)
   const [touchStartY, setTouchStartY] = useState(0)
 
   const handleTouchStart = (e) => setTouchStartY(e.touches[0].clientY)
@@ -196,21 +197,32 @@ const CaptainRideNavigation = () => {
           </div>
         </div>
 
-        {/* Action Button */}
-        <div className="px-6 pb-6">
+        <div className="px-6 pb-6 space-y-3">
           {isCaptainView ? (
-            <button
-              type="button"
-              onClick={isRideStarted ? handleRideCompleted : handleStartRide}
-              className={`w-full flex items-center justify-center gap-2 rounded-lg py-3.5 text-sm font-bold uppercase tracking-wider transition-all ${
-                isRideStarted
-                  ? 'bg-error text-on-error hover:bg-error/90'
-                  : 'bg-primary-container text-on-primary-container hover:brightness-95'
-              }`}
-            >
-              <span className="material-symbols-outlined text-lg">{isRideStarted ? 'stop_circle' : 'play_arrow'}</span>
-              {isRideStarted ? 'Complete Ride' : 'Start Ride'}
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={isRideStarted ? handleRideCompleted : handleStartRide}
+                className={`w-full flex items-center justify-center gap-2 rounded-lg py-3.5 text-sm font-bold uppercase tracking-wider transition-all ${
+                  isRideStarted
+                    ? 'bg-error text-on-error hover:bg-error/90'
+                    : 'bg-primary-container text-on-primary-container hover:brightness-95'
+                }`}
+              >
+                <span className="material-symbols-outlined text-lg">{isRideStarted ? 'stop_circle' : 'play_arrow'}</span>
+                {isRideStarted ? 'Complete Ride' : 'Start Ride'}
+              </button>
+              {isRideStarted && (
+                <button
+                  type="button"
+                  onClick={() => setShowQR(true)}
+                  className="w-full flex items-center justify-center gap-2 rounded-lg bg-surface-container-low text-on-surface py-3.5 border border-outline-variant/30 text-sm font-bold uppercase tracking-wider hover:bg-surface-container-high transition-all"
+                >
+                  <span className="material-symbols-outlined text-lg">qr_code</span>
+                  Show Payment QR
+                </button>
+              )}
+            </>
           ) : (
             <button
               type="button"
@@ -223,6 +235,36 @@ const CaptainRideNavigation = () => {
           )}
         </div>
       </div>
+      {/* QR Code Modal */}
+      {showQR && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 p-6 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-2xl bg-surface p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-display text-xl font-extrabold tracking-tight text-on-surface">Collect Payment</h3>
+              <button onClick={() => setShowQR(false)} className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors text-on-surface-variant">
+                <span className="material-symbols-outlined text-sm">close</span>
+              </button>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className="rounded-xl border border-outline-variant/30 bg-white p-4 mb-4">
+                <img 
+                  src={`https://chart.googleapis.com/chart?cht=qr&chs=250x250&chl=${encodeURIComponent(`upi://pay?pa=${import.meta.env.VITE_COMPANY_UPI_ID || 'yourcompany@upi'}&pn=Velocity&am=${rideMeta.fare || 0}&cu=INR`)}`} 
+                  alt="UPI QR Code" 
+                  className="w-48 h-48"
+                />
+              </div>
+              <p className="text-sm font-bold text-on-surface mb-1">Amount Due: ₹{rideMeta.fare || 0}</p>
+              <p className="text-xs text-on-surface-variant text-center">Ask the customer to scan this QR code using any UPI app (GPay, PhonePe, Paytm)</p>
+            </div>
+            <button
+              onClick={() => setShowQR(false)}
+              className="mt-6 w-full rounded-lg bg-primary-container py-3 text-sm font-bold tracking-wider text-on-primary-container uppercase transition-colors hover:brightness-95"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   )
 }

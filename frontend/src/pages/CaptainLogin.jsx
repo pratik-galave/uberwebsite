@@ -19,7 +19,7 @@ const CaptainLogin = () => {
       const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3000'
       const response = await axios.post(`${baseUrl}/captain/login`, { email, password })
       if (response.data?.token) {
-        localStorage.setItem('token', response.data.token)
+        localStorage.setItem('captainToken', response.data.token)
       }
       if (response.data?.captain) {
         setCaptainData(response.data.captain)

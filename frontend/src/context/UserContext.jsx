@@ -51,7 +51,9 @@ const UserContext = ({ children }) => {
           setUserData(response.data.user)
         }
       } catch (error) {
-        console.error('Failed to load user profile:', error)
+        if (error?.response?.status !== 401) {
+          console.error('Failed to load user profile:', error)
+        }
       }
     }
 

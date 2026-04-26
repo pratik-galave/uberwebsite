@@ -35,7 +35,7 @@ const CaptainSignup = () => {
         },
       })
       if (response.data?.token) {
-        localStorage.setItem('token', response.data.token)
+        localStorage.setItem('captainToken', response.data.token)
       }
       if (response.data?.captain) {
         setCaptainData(response.data.captain)

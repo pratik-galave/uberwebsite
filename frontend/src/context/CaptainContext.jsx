@@ -66,7 +66,9 @@ const CaptainContext = ({ children }) => {
           setCaptainData(normalizedCaptain)
         }
       } catch (error) {
-        console.error('Failed to load captain profile:', error)
+        if (error?.response?.status !== 401) {
+          console.error('Failed to load captain profile:', error)
+        }
       }
     }
 

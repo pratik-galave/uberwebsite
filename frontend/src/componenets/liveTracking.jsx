@@ -129,10 +129,13 @@ const LiveTracking = ({ captainLocation, pickupCoords, destinationCoords, pickup
             }
         }
 
-        resolveCoords()
+        const timerId = setTimeout(() => {
+            resolveCoords()
+        }, 1500) // 1.5s debounce to prevent rate-limiting
 
         return () => {
             cancelled = true
+            clearTimeout(timerId)
         }
     }, [pickupString, destString, pickupCoords, destinationCoords])
 
