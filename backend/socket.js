@@ -81,7 +81,7 @@ export function initializeSocket(server) {
                     const user = await userModel.findByIdAndUpdate(
                         userId,
                         { socketId: socket.id },
-                        { new: true }
+                        { returnDocument: 'after' }
                     );
 
                     if (user) {
@@ -93,7 +93,7 @@ export function initializeSocket(server) {
                     const captain = await captainModel.findByIdAndUpdate(
                         userId,
                         { socketId: socket.id },
-                        { new: true }
+                        { returnDocument: 'after' }
                     );
 
                     if (captain) {
@@ -149,7 +149,7 @@ export function initializeSocket(server) {
                             longitude: location.longitude,
                         },
                     },
-                    { new: true }
+                    { returnDocument: 'after' }
                 );
 
                 const activeRides = await rideModel.find(
