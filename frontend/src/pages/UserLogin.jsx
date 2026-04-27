@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { BASE_URL } from '../config'
 import { UserDataContext } from '../context/userDataContext.js'
 
 const UserLogin = () => {
@@ -16,8 +17,7 @@ const UserLogin = () => {
     setError('')
     setIsLoading(true)
     try {
-      const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3000'
-      const response = await axios.post(`${baseUrl}/user/login`, { email, password })
+      const response = await axios.post(`${BASE_URL}/user/login`, { email, password })
       if (response.data?.token) {
         localStorage.setItem('token', response.data.token)
       }

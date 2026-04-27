@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { UserDataContext } from '../context/userDataContext.js'
+import { BASE_URL } from '../config'
 
 const UserSignup = () => {
   const [firstname, setFirstname] = useState('')
@@ -18,8 +19,7 @@ const UserSignup = () => {
     setError('')
     setIsLoading(true)
     try {
-      const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3000'
-      const response = await axios.post(`${baseUrl}/user/register`, {
+      const response = await axios.post(`${BASE_URL}/user/register`, {
         fullname: { firstname, lastname },
         email,
         password,

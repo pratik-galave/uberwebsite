@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
+import { BASE_URL } from '../config'
 import { UserDataContext } from './userDataContext'
 
 const getUserIdFromToken = (token) => {
@@ -37,11 +38,9 @@ const UserContext = ({ children }) => {
       return
     }
 
-    const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3000'
-
     const loadUserProfile = async () => {
       try {
-        const response = await axios.get(`${baseUrl}/user/profile`, {
+        const response = await axios.get(`${BASE_URL}/user/profile`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

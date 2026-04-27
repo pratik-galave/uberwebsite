@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { BASE_URL } from '../config'
 import { CaptainDataContext } from '../context/captainDataContext.js'
 
 const CaptainSignup = () => {
@@ -22,8 +23,7 @@ const CaptainSignup = () => {
     setError('')
     setIsLoading(true)
     try {
-      const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3000'
-      const response = await axios.post(`${baseUrl}/captain/register`, {
+      const response = await axios.post(`${BASE_URL}/captain/register`, {
         fullname: { firstname, lastname },
         email,
         password,

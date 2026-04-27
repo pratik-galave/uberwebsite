@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
+import { BASE_URL } from '../config'
 import { CaptainDataContext } from './captainDataContext'
 
 const getCaptainIdFromToken = (token) => {
@@ -51,11 +52,9 @@ const CaptainContext = ({ children }) => {
       return
     }
 
-    const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3000'
-
     const loadCaptainProfile = async () => {
       try {
-        const response = await axios.get(`${baseUrl}/captain/profile`, {
+        const response = await axios.get(`${BASE_URL}/captain/profile`, {
           headers: {
             Authorization: `Bearer ${captainToken}`,
           },
