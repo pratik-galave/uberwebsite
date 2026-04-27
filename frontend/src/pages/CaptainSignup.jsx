@@ -29,7 +29,7 @@ const CaptainSignup = () => {
         password,
         vehicle: {
           color: vehicleColor,
-          plate: vehiclePlate,
+          vehiclePlate,
           capacity: Number(vehicleCapacity),
           vehicleType,
         },

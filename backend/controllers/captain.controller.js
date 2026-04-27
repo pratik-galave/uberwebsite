@@ -1,5 +1,6 @@
 import blacklistTokenModel from "../models/blacklistToken.model.js";
 import captainModel from "../models/captain.model.js";
+import rideModel from "../models/ride.model.js";
 import { createCaptain } from "../services/captain.service.js";
 import { validationResult } from 'express-validator';
 
@@ -80,6 +81,78 @@ export async function getCaptainProfile(req, res) {
     res.status(200).json({ captain });
 }   
 
+export async function getCaptainStats(req, res) {
+    try {
+        const captainId = req.captain?._id;
+        if (!captainId) {
+            return res.status(401).json({ error: 'Captain not authenticated' });
+        }
+
+        const timezoneOffsetMinutes = Number(req.query?.timezoneOffsetMinutes);
+        const offsetMinutes = Number.isFinite(timezoneOffsetMinutes) ? timezoneOffsetMinutes : 0;
+        const now = Date.now();
+        const millisecondsInDay = 24 * 60 * 60 * 1000;
+
+        const localNow = now - (offsetMinutes * 60 * 1000);
+        const localMidnight = Math.floor(localNow / millisecondsInDay) * millisecondsInDay;
+        const dayStart = new Date(localMidnight + (offsetMinutes * 60 * 1000));
+        const dayEnd = new Date(dayStart.getTime() + millisecondsInDay);
+
+        const stats = await rideModel.aggregate([
+            {
+                $match: {
+                    captain: captainId,
+                    status: 'completed',
+                    updatedAt: {
+                        $gte: dayStart,
+                        $lt: dayEnd,
+                    },
+                },
+            },
+            {
+                $project: {
+                    fare: { $ifNull: ['$fare', 0] },
+                    durationSeconds: {
+                        $max: [
+                            0,
+                            {
+                                $divide: [
+                                    { $subtract: ['$updatedAt', '$createdAt'] },
+                                    1000,
+                                ],
+                            },
+                        ],
+                    },
+                },
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalEarnings: { $sum: '$fare' },
+                    totalRides: { $sum: 1 },
+                    onlineSeconds: { $sum: '$durationSeconds' },
+                },
+            },
+        ]);
+
+        const summary = stats[0] || {
+            totalEarnings: 0,
+            totalRides: 0,
+            onlineSeconds: 0,
+        };
+
+        return res.status(200).json({
+            stats: {
+                earnings: Number(summary.totalEarnings) || 0,
+                rides: Number(summary.totalRides) || 0,
+                onlineSeconds: Math.floor(Number(summary.onlineSeconds) || 0),
+            },
+        });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to fetch captain stats' });
+    }
+}
+
 export async function logoutCaptain(req, res) { 
     const token = req.cookies.token;
     await blacklistTokenModel.create({ token });
@@ -91,6 +164,7 @@ const captainController = {
     registerCaptain,
     loginCaptain,
     getCaptainProfile,
+    getCaptainStats,
     logoutCaptain
 };
 

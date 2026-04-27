@@ -10,10 +10,6 @@ const CaptainRideNavigation = () => {
   const [isRideStarted, setIsRideStarted] = useState(() => {
     return localStorage.getItem('isRideStarted') === 'true'
   })
-  const [rideStartTime, setRideStartTime] = useState(() => {
-    const stored = localStorage.getItem('rideStartTime')
-    return stored ? parseInt(stored, 10) : null
-  })
   const [captainLocation, setCaptainLocation] = useState(null)
   const [isPanelOpen, setIsPanelOpen] = useState(true)
   const [showQR, setShowQR] = useState(false)
@@ -96,32 +92,15 @@ const CaptainRideNavigation = () => {
     if (!isCaptainView) return
     if (rideId) sendMessageToEvent('captainUpdateRideStatus', { rideId, status: 'in_progress' })
     setIsRideStarted(true)
-    const startTime = Date.now()
-    setRideStartTime(startTime)
     localStorage.setItem('isRideStarted', 'true')
-    localStorage.setItem('rideStartTime', startTime.toString())
   }
 
   const handleRideCompleted = () => {
     if (!isCaptainView) return
     if (rideId) sendMessageToEvent('captainUpdateRideStatus', { rideId, status: 'completed' })
-    try {
-      const today = new Date().toLocaleDateString('en-CA')
-      const statsStr = localStorage.getItem('captainStats')
-      const stats = statsStr ? JSON.parse(statsStr) : { earnings: 0, rides: 0, onlineSeconds: 0, lastResetDate: today }
-      if (stats.lastResetDate !== today) { stats.earnings = 0; stats.rides = 0; stats.onlineSeconds = 0; stats.lastResetDate = today }
-      const newFare = Number(rideMeta?.fare) || 120
-      stats.earnings += newFare
-      stats.rides += 1
-      if (rideStartTime) stats.onlineSeconds += Math.floor((Date.now() - rideStartTime) / 1000)
-      localStorage.setItem('captainStats', JSON.stringify(stats))
-    } catch (err) {
-      console.error('Failed to update stats on ride completion:', err)
-    }
     localStorage.removeItem('activeCaptainRideId')
     localStorage.removeItem('activeCaptainRideMeta')
     localStorage.removeItem('isRideStarted')
-    localStorage.removeItem('rideStartTime')
     navigate('/captain-home')
   }
 
@@ -177,7 +156,7 @@ const CaptainRideNavigation = () => {
           <div className="h-1 w-10 rounded-full bg-outline-variant/30" />
         </div>
 
-        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isPanelOpen ? 'max-h-[400px] opacity-100 mb-2' : 'max-h-0 opacity-0 mb-0'}`}>
+        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isPanelOpen ? 'max-h-100 opacity-100 mb-2' : 'max-h-0 opacity-0 mb-0'}`}>
           {/* Route Info */}
           <div className="mx-6 rounded-lg border border-outline-variant/15 overflow-hidden mb-4">
             <div className="flex items-start gap-3 p-4 border-b border-outline-variant/10">

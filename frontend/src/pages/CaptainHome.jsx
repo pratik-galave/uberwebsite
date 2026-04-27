@@ -1,11 +1,13 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import axios from 'axios'
 import LiveTracking from '../componenets/liveTracking.jsx'
 import CustomerRequestPanel from '../componenets/customerRequestPanel.jsx'
 import CustomerInfoPanel from '../componenets/customerInfoPanel.jsx'
 import TotalEarningPanel from '../componenets/totalEarningPanel.jsx'
 import { SocketDataContext } from '../context/socketDataContext.js'
 import { CaptainDataContext } from '../context/captainDataContext.js'
+import { BASE_URL } from '../config.js'
 
 const CaptainHome = () => {
   const navigate = useNavigate()
@@ -15,50 +17,7 @@ const CaptainHome = () => {
   const [, setRideRequestQueue] = useState([])
   const [currentLocation, setCurrentLocation] = useState(null)
 
-  const [captainStats, setCaptainStats] = useState(() => {
-    const today = new Date().toLocaleDateString('en-CA')
-    const stored = localStorage.getItem('captainStats')
-    if (stored) {
-      try {
-        const stats = JSON.parse(stored)
-        if (stats.lastResetDate !== today) {
-          return { earnings: 0, rides: 0, onlineSeconds: 0, lastResetDate: today }
-        }
-        return stats
-      } catch (error) {
-        console.error('Failed to parse captain stats:', error)
-      }
-    }
-    return { earnings: 0, rides: 0, onlineSeconds: 0, lastResetDate: today }
-  })
-
-  useEffect(() => {
-    const checkAndResetStats = () => {
-      const today = new Date().toLocaleDateString('en-CA')
-      const stored = localStorage.getItem('captainStats')
-
-      if (stored) {
-        try {
-          const stats = JSON.parse(stored)
-          if (stats.lastResetDate !== today) {
-            const resetStats = { earnings: 0, rides: 0, onlineSeconds: 0, lastResetDate: today }
-            setCaptainStats(resetStats)
-            localStorage.setItem('captainStats', JSON.stringify(resetStats))
-          }
-        } catch (error) {
-          console.error('Failed to reset captain stats:', error)
-        }
-      } else {
-        const initialStats = { earnings: 0, rides: 0, onlineSeconds: 0, lastResetDate: today }
-        setCaptainStats(initialStats)
-        localStorage.setItem('captainStats', JSON.stringify(initialStats))
-      }
-    }
-
-    checkAndResetStats()
-    const interval = setInterval(checkAndResetStats, 60000)
-    return () => clearInterval(interval)
-  }, [])
+  const [captainStats, setCaptainStats] = useState({ earnings: 0, rides: 0, onlineSeconds: 0 })
 
   const formatOnlineHours = (totalSeconds) => {
     const hours = (totalSeconds / 3600).toFixed(1)
@@ -77,6 +36,37 @@ const CaptainHome = () => {
 
   const { sendMessageToEvent, receiveMessageFromEvent } = useContext(SocketDataContext)
   const { captainData } = useContext(CaptainDataContext)
+
+  useEffect(() => {
+    const captainToken = localStorage.getItem('captainToken')
+    if (!captainToken) return undefined
+
+    const fetchCaptainStats = async () => {
+      try {
+        const timezoneOffsetMinutes = new Date().getTimezoneOffset()
+        const response = await axios.get(`${BASE_URL}/captain/stats`, {
+          params: { timezoneOffsetMinutes },
+          headers: {
+            Authorization: `Bearer ${captainToken}`,
+          },
+        })
+
+        if (response.data?.stats) {
+          setCaptainStats({
+            earnings: Number(response.data.stats.earnings) || 0,
+            rides: Number(response.data.stats.rides) || 0,
+            onlineSeconds: Number(response.data.stats.onlineSeconds) || 0,
+          })
+        }
+      } catch (error) {
+        console.error('Failed to fetch captain stats:', error)
+      }
+    }
+
+    fetchCaptainStats()
+    const refreshInterval = window.setInterval(fetchCaptainStats, 30000)
+    return () => window.clearInterval(refreshInterval)
+  }, [captainData?._id])
 
   const openNextQueuedRideRequest = () => {
     setRideRequestQueue((previousQueue) => {
@@ -192,13 +182,11 @@ const CaptainHome = () => {
   const requestPickup = incomingRideRequest?.origin || 'Pickup unavailable'
   const requestDropoff = incomingRideRequest?.destination || 'Dropoff unavailable'
 
-  const captainName = [captainData?.firstname, captainData?.lastname].filter(Boolean).join(' ') || 'Captain'
-
   return (
     <main className="fixed inset-0 w-full overflow-hidden bg-background text-on-surface">
       {/* Location Warning */}
       {locationWarning && (
-        <div className="absolute left-6 right-6 top-6 z-[60] rounded-lg bg-error-container border border-error/30 px-4 py-3">
+        <div className="absolute left-6 right-6 top-6 z-60 rounded-lg bg-error-container border border-error/30 px-4 py-3">
           <div className="flex items-start gap-2">
             <span className="material-symbols-outlined text-lg text-on-error-container">warning</span>
             <p className="text-xs font-medium text-on-error-container">{locationWarning}</p>
