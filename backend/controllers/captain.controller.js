@@ -35,7 +35,12 @@ export async function registerCaptain(req, res) {
         });
 
         const token = captain.generateAuthToken();
-        res.cookie('token', token, { httpOnly: true });
+        res.cookie('token', token, { 
+            httpOnly: true, 
+            secure: true, 
+            sameSite: 'none',
+            maxAge: 24 * 60 * 60 * 1000
+        });
 
         return res.status(201).json({ message: 'Captain registered successfully', captain, token });
     } catch (error) {
@@ -61,7 +66,12 @@ export async function loginCaptain(req, res) {
         return res.status(401).json({ error: 'Invalid credentials' });
     }
     const token = captain.generateAuthToken();
-    res.cookie('token', token, { httpOnly: true }); // Set token in cookie
+    res.cookie('token', token, { 
+        httpOnly: true, 
+        secure: true, 
+        sameSite: 'none',
+        maxAge: 24 * 60 * 60 * 1000
+    }); 
     res.status(200).json({ message: 'Login successful', captain, token });
 }
 

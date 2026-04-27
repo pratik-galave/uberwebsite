@@ -51,7 +51,12 @@ export async function loginUser(req, res) {
         }
 
         const token = user.generateAuthToken();
-        res.cookie('token', token, { httpOnly: true }); // Set token in cookie
+        res.cookie('token', token, { 
+            httpOnly: true, 
+            secure: true, // Required for cross-site cookies
+            sameSite: 'none', // Required for cross-site cookies
+            maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        }); 
         res.status(200).json({ message: 'Login successful', user, token });
     } catch (error) {
         res.status(500).json({ error: error.message });
