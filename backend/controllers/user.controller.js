@@ -10,7 +10,8 @@ export async function registerUser(req, res ,next) {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { firstname, lastname, email, password } = req.body;
+    const { fullname, email, password } = req.body;
+    const { firstname, lastname } = fullname || {};
 
     try {
         const isUserExist = await userModel.findOne({ email });
