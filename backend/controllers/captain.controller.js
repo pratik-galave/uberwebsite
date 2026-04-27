@@ -62,7 +62,7 @@ export async function loginCaptain(req, res) {
     }
     const token = captain.generateAuthToken();
     res.cookie('token', token, { httpOnly: true }); // Set token in cookie
-    res.status(200).json({ message: 'Login successful', token  });
+    res.status(200).json({ message: 'Login successful', captain, token });
 }
 
 export async function getCaptainProfile(req, res) {

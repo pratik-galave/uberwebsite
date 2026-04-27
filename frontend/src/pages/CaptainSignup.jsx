@@ -75,7 +75,9 @@ const CaptainSignup = () => {
 
           {error && (
             <div className="mt-6 rounded-md border border-error/30 bg-error-container px-4 py-3">
-              <p className="text-sm font-medium text-on-error-container">{error}</p>
+              <p className="text-sm font-medium text-on-error-container">
+                {typeof error === 'object' ? (error.message || JSON.stringify(error)) : error}
+              </p>
             </div>
           )}
 
@@ -130,7 +132,7 @@ const CaptainSignup = () => {
                 <select value={vehicleType} onChange={(e) => setVehicleType(e.target.value)} className={inputClass}>
                   <option value="car">Car</option>
                   <option value="auto">Auto</option>
-                  <option value="motorcycle">Motorcycle</option>
+                  <option value="bike">Motorcycle</option>
                 </select>
               </div>
             </div>

@@ -61,7 +61,9 @@ const UserSignup = () => {
 
           {error && (
             <div className="mb-6 rounded-md border border-error/30 bg-error-container px-4 py-3">
-              <p className="text-sm font-medium text-on-error-container">{error}</p>
+              <p className="text-sm font-medium text-on-error-container">
+                {typeof error === 'object' ? (error.message || JSON.stringify(error)) : error}
+              </p>
             </div>
           )}
 
