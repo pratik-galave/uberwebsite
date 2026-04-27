@@ -248,9 +248,9 @@ const CaptainRideNavigation = () => {
             <div className="flex flex-col items-center">
               <div className="rounded-xl border border-outline-variant/30 bg-white p-4 mb-4">
                 <img 
-                  src={`https://chart.googleapis.com/chart?cht=qr&chs=250x250&chl=${encodeURIComponent(`upi://pay?pa=${import.meta.env.VITE_COMPANY_UPI_ID || 'yourcompany@upi'}&pn=Velocity&am=${rideMeta.fare || 0}&cu=INR`)}`} 
+                  src={`https://quickchart.io/qr?size=250&text=${encodeURIComponent(`upi://pay?pa=${import.meta.env.VITE_COMPANY_UPI_ID || 'yourcompany@upi'}&pn=Velocity&am=${String(rideMeta?.fare || 0).replace('₹', '').trim()}&cu=INR`)}`} 
                   alt="UPI QR Code" 
-                  className="w-48 h-48"
+                  className="w-48 h-48 object-contain"
                 />
               </div>
               <p className="text-sm font-bold text-on-surface mb-1">Amount Due: ₹{rideMeta.fare || 0}</p>

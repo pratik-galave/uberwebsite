@@ -80,9 +80,9 @@ const MakePaymentPanel = ({ customerName, fare, paymentStatus, paymentError, onM
             <p className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-3">Or Scan to Pay via UPI</p>
             <div className="rounded-xl border border-outline-variant/30 bg-white p-2 mb-2 shadow-sm">
               <img 
-                src={`https://chart.googleapis.com/chart?cht=qr&chs=150x150&chl=${encodeURIComponent(`upi://pay?pa=${import.meta.env.VITE_COMPANY_UPI_ID || 'yourcompany@upi'}&pn=Velocity&am=${String(fare || 0).replace('₹', '').trim()}&cu=INR`)}`} 
+                src={`https://quickchart.io/qr?size=150&text=${encodeURIComponent(`upi://pay?pa=${import.meta.env.VITE_COMPANY_UPI_ID || 'yourcompany@upi'}&pn=Velocity&am=${String(fare || 0).replace('₹', '').trim()}&cu=INR`)}`} 
                 alt="UPI QR Code" 
-                className="w-32 h-32"
+                className="w-32 h-32 object-contain"
               />
             </div>
             <p className="text-[10px] text-on-surface-variant text-center px-4">Scan with GPay, PhonePe, or Paytm</p>
