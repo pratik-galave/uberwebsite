@@ -192,7 +192,7 @@ const CaptainHome = () => {
   const requestPickup = incomingRideRequest?.origin || 'Pickup unavailable'
   const requestDropoff = incomingRideRequest?.destination || 'Dropoff unavailable'
 
-  const captainName = [captainData?.fullname?.firstname, captainData?.fullname?.lastname].filter(Boolean).join(' ') || 'Captain'
+  const captainName = [captainData?.firstname, captainData?.lastname].filter(Boolean).join(' ') || 'Captain'
 
   return (
     <main className="fixed inset-0 w-full overflow-hidden bg-background text-on-surface">

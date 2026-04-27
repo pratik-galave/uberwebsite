@@ -7,6 +7,7 @@ import ConfirmRidePanel from '../componenets/confirmRidePanel.jsx'
 import VehicleFindingPanel from '../componenets/vehicleFindingPanel.jsx'
 import DriverDetailsPanel from '../componenets/driverDetailsPanel.jsx'
 import VehicleTypePanel from '../componenets/vehicleTypePanel.jsx'
+import { BASE_URL } from '../config.js'
 import { SocketDataContext } from '../context/socketDataContext.js'
 import { UserDataContext } from '../context/userDataContext.js'
 
@@ -132,7 +133,7 @@ const Home = () => {
     if (trimmedInput.length < 3) { setLocationSuggestions([]); setIsSuggestionLoading(false); return }
 
     let isCancelled = false
-    const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3000'
+    const baseUrl = BASE_URL
     const token = localStorage.getItem('token')
 
     const timer = setTimeout(async () => {
@@ -172,7 +173,7 @@ const Home = () => {
   const handleConfirmRide = async () => {
     if (!selectedVehicle?.id) { setCreateRideError('Please select a vehicle type first.'); return }
     const token = localStorage.getItem('token')
-    const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3000'
+    const baseUrl = BASE_URL
     if (!token) { setCreateRideError('You are not logged in. Please login again.'); return }
 
     try {
@@ -207,7 +208,7 @@ const Home = () => {
     const normalizedAddress = String(address || '').trim()
     if (!normalizedAddress) return null
     const token = localStorage.getItem('token')
-    const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3000'
+    const baseUrl = BASE_URL
     try {
       const response = await axios.get(`${baseUrl}/maps/get-coordinates`, {
         params: { address: normalizedAddress },

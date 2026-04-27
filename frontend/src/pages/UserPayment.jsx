@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { BASE_URL } from '../config.js'
 import MakePaymentPanel from '../componenets/makePaymentPanel.jsx'
 
 const UserPayment = () => {
@@ -31,7 +32,7 @@ const UserPayment = () => {
       return
     }
 
-    const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3000'
+    const baseUrl = BASE_URL
     const token = localStorage.getItem('token')
 
     if (!token) {

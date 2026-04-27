@@ -1,14 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { io } from 'socket.io-client'
 import { SocketDataContext } from './socketDataContext'
-import { BASE_URL } from '../config'
+import { BASE_URL, SOCKET_URL } from '../config'
 
 const SocketContext = ({ children }) => {
   const [socket, setSocket] = useState(null)
   const [isConnected, setIsConnected] = useState(false)
 
   useEffect(() => {
-    const socketUrl = import.meta.env.VITE_SOCKET_URL || BASE_URL
+    const socketUrl = SOCKET_URL
     const socketInstance = io(socketUrl, {
       autoConnect: true,
       withCredentials: true,

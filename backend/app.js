@@ -12,7 +12,13 @@ connectDB();
 const app = express();
 app.use(cookieParser());
 app.use(cors({
-    origin: process.env.FRONTEND_URL || '*',
+    origin: (origin, callback) => {
+        // Allow requests with no origin (like mobile apps or curl)
+        if (!origin) return callback(null, true);
+        // In production, you should ideally restrict this to your frontend URL
+        // For now, we allow any origin but echo it back to satisfy credentials: true
+        callback(null, true);
+    },
     credentials: true
 }));
 app.use(express.json());

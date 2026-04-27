@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { BASE_URL } from '../config.js'
 import { CaptainDataContext } from '../context/captainDataContext.js'
 
 const CaptainLogin = () => {
@@ -16,7 +17,7 @@ const CaptainLogin = () => {
     setError('')
     setIsLoading(true)
     try {
-      const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3000'
+      const baseUrl = BASE_URL
       const response = await axios.post(`${baseUrl}/captain/login`, { email, password })
       if (response.data?.token) {
         localStorage.setItem('captainToken', response.data.token)

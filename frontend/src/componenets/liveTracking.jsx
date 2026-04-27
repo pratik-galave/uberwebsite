@@ -2,6 +2,7 @@ import React, { useMemo, useEffect, useState } from 'react'
 import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import axios from 'axios'
+import { BASE_URL } from '../config.js'
 import 'leaflet/dist/leaflet.css'
 
 delete L.Icon.Default.prototype._getIconUrl
@@ -73,7 +74,7 @@ const LiveTracking = ({ captainLocation, pickupCoords, destinationCoords, pickup
             }
 
             const token = localStorage.getItem('token')
-            const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3000'
+            const baseUrl = BASE_URL
 
             try {
                 const response = await axios.get(`${baseUrl}/maps/get-coordinates`, {

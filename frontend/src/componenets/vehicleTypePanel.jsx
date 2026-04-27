@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
+import { BASE_URL } from '../config.js'
 
 const vehicleOptions = [
   { id: 'car', title: 'Velocity Car', desc: 'Comfortable sedan', icon: 'directions_car', capacity: '4 seats', eta: '3 min' },
@@ -14,7 +15,7 @@ const VehicleTypePanel = ({ pickupLocation, destination, pickupCoords, destinati
 
   useEffect(() => {
     const token = localStorage.getItem('token')
-    const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3000'
+    const baseUrl = BASE_URL
     const fetchFares = async () => {
       try {
         setIsLoading(true)
