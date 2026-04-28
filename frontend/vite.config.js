@@ -7,6 +7,6 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     host: true,
-    allowedHosts: ['cbz61k04-5173.inc1.devtunnels.ms'],
+    allowedHosts: true,
   },
 })

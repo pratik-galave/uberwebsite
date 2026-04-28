@@ -76,7 +76,11 @@ export async function logoutUser(req, res) {
     res.clearCookie('token');
     const token= req.cookies?.token || req.headers.authorization?.split(' ')[1];
     if (token) {
-        await blacklistTokenModel.create({ token });
+        try {
+            await blacklistTokenModel.create({ token });
+        } catch (err) {
+            // Ignore duplicate key errors if the token is already blacklisted
+        }
     }
     res.status(200).json({ message: 'Logout successful' });
 }

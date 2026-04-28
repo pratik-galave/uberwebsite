@@ -158,8 +158,14 @@ export async function getCaptainStats(req, res) {
 }
 
 export async function logoutCaptain(req, res) { 
-    const token = req.cookies.token;
-    await blacklistTokenModel.create({ token });
+    const token = req.cookies?.token || req.headers.authorization?.split(' ')[1];
+    if (token) {
+        try {
+            await blacklistTokenModel.create({ token });
+        } catch (err) {
+            // Ignore duplicate key error
+        }
+    }
     res.clearCookie('token');
     res.status(200).json({ message: 'Logout successful' });
 }
