@@ -26,4 +26,6 @@ router.get('/stats', authMiddleware.authCaptain, captainController.getCaptainSta
 
 router.get('/logout', authMiddleware.authCaptain, captainController.logoutCaptain   );
 
+router.post('/google-auth', captainController.googleAuthCaptain);
+
 export default router;

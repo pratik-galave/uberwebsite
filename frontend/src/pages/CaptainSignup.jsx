@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { GoogleLogin } from '@react-oauth/google'
 import { BASE_URL } from '../config'
 import { CaptainDataContext } from '../context/captainDataContext.js'
 
@@ -43,6 +44,34 @@ const CaptainSignup = () => {
       navigate('/captain-home')
     } catch (err) {
       setError(err?.response?.data?.message || err?.response?.data?.errors?.[0]?.msg || 'Registration failed.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setError('')
+    setIsLoading(true)
+    try {
+      const response = await axios.post(`${BASE_URL}/captain/google-auth`, {
+        token: credentialResponse.credential,
+        // Google auth during signup requires vehicle details as fallback
+        vehicle: {
+          color: vehicleColor || 'Not specified',
+          vehiclePlate: vehiclePlate || 'Not specified',
+          capacity: Number(vehicleCapacity) || 4,
+          vehicleType: vehicleType || 'car',
+        }
+      })
+      if (response.data?.token) {
+        localStorage.setItem('captainToken', response.data.token)
+      }
+      if (response.data?.captain) {
+        setCaptainData(response.data.captain)
+      }
+      navigate('/captain-home')
+    } catch (err) {
+      setError(err?.response?.data?.message || err?.response?.data?.error || 'Google signup failed. Make sure vehicle details are filled.')
     } finally {
       setIsLoading(false)
     }
@@ -146,6 +175,27 @@ const CaptainSignup = () => {
               {!isLoading && <span className="material-symbols-outlined text-lg">arrow_forward</span>}
             </button>
           </form>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-outline-variant/30"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="bg-background px-2 text-on-surface-variant">Or sign up with Google</span>
+              </div>
+            </div>
+            
+            <p className="text-xs text-center text-on-surface-variant mt-2 mb-4">Please fill in Vehicle Details above before clicking Google Signup.</p>
+
+            <div className="flex justify-center">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setError('Google Signup Failed')}
+                useOneTap
+              />
+            </div>
+          </div>
 
           <p className="mt-6 text-center text-sm text-on-surface-variant">
             Already registered?{' '}

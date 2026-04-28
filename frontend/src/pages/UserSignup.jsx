@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { GoogleLogin } from '@react-oauth/google'
 import { UserDataContext } from '../context/userDataContext.js'
 import { BASE_URL } from '../config'
 
@@ -33,6 +34,27 @@ const UserSignup = () => {
       navigate('/home')
     } catch (err) {
       setError(err?.response?.data?.message || err?.response?.data?.errors?.[0]?.msg || 'Registration failed.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setError('')
+    setIsLoading(true)
+    try {
+      const response = await axios.post(`${BASE_URL}/user/google-auth`, {
+        token: credentialResponse.credential,
+      })
+      if (response.data?.token) {
+        localStorage.setItem('token', response.data.token)
+      }
+      if (response.data?.user) {
+        setUserData(response.data.user)
+      }
+      navigate('/home')
+    } catch (err) {
+      setError(err?.response?.data?.message || err?.response?.data?.error || 'Google signup failed.')
     } finally {
       setIsLoading(false)
     }
@@ -127,6 +149,25 @@ const UserSignup = () => {
               {!isLoading && <span className="material-symbols-outlined text-lg">arrow_forward</span>}
             </button>
           </form>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-outline-variant/30"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="bg-background px-2 text-on-surface-variant">Or sign up with</span>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-center">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setError('Google Signup Failed')}
+                useOneTap
+              />
+            </div>
+          </div>
 
           <p className="mt-6 text-center text-sm text-on-surface-variant">
             Already registered?{' '}

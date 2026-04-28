@@ -19,4 +19,6 @@ router.get('/profile', authMiddleware.authUser, userController.getUserProfile);
 
 router.get('/logout', authMiddleware.authUser, userController.logoutUser);
 
+router.post('/google-auth', userController.googleAuthUser);
+
 export default router;

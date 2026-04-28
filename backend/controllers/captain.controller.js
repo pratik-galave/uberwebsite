@@ -3,6 +3,10 @@ import captainModel from "../models/captain.model.js";
 import rideModel from "../models/ride.model.js";
 import { createCaptain } from "../services/captain.service.js";
 import { validationResult } from 'express-validator';
+import { OAuth2Client } from 'google-auth-library';
+import crypto from 'crypto';
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export async function registerCaptain(req, res) {
     const errors = validationResult(req);
@@ -160,12 +164,65 @@ export async function logoutCaptain(req, res) {
     res.status(200).json({ message: 'Logout successful' });
 }
 
+export async function googleAuthCaptain(req, res) {
+    const { token, vehicle } = req.body;
+    if (!token) {
+        return res.status(400).json({ error: 'Google token is required' });
+    }
+
+    try {
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+
+        const payload = ticket.getPayload();
+        const { email, given_name, family_name } = payload;
+
+        let captain = await captainModel.findOne({ email }).select('+password');
+
+        if (!captain) {
+            // Create a new captain if they don't exist
+            if (!vehicle || !vehicle.color || !vehicle.vehicleType || !vehicle.vehiclePlate || !vehicle.capacity) {
+                return res.status(400).json({ error: 'Vehicle details are required for new Captain registration via Google' });
+            }
+
+            const randomPassword = crypto.randomBytes(32).toString('hex');
+            const hashPassword = await captainModel.hashPassword(randomPassword);
+
+            captain = await createCaptain({
+                firstname: given_name || email.split('@')[0],
+                lastname: family_name || '',
+                email,
+                password: hashPassword,
+                color: vehicle.color,
+                vehicleType: vehicle.vehicleType,
+                vehiclePlate: vehicle.vehiclePlate,
+                capacity: vehicle.capacity
+            });
+        }
+
+        const authToken = captain.generateAuthToken();
+        res.cookie('token', authToken, { 
+            httpOnly: true, 
+            secure: true, 
+            sameSite: 'none',
+            maxAge: 24 * 60 * 60 * 1000
+        }); 
+        res.status(200).json({ message: 'Google authentication successful', captain, token: authToken });
+    } catch (error) {
+        console.error('Google Auth Error:', error);
+        res.status(401).json({ error: 'Invalid Google token or creation failed' });
+    }   
+}
+
 const captainController = {
     registerCaptain,
     loginCaptain,
     getCaptainProfile,
     getCaptainStats,
-    logoutCaptain
+    logoutCaptain,
+    googleAuthCaptain
 };
 
 export default captainController;
