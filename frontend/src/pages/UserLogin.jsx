@@ -109,6 +109,7 @@ const UserLogin = () => {
               </label>
               <input
                 type="password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required

@@ -104,6 +104,7 @@ const CaptainLogin = () => {
               <label className="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Password</label>
               <input
                 type="password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required

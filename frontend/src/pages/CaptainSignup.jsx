@@ -133,7 +133,7 @@ const CaptainSignup = () => {
 
             <div>
               <label className="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2">Password</label>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} placeholder="Minimum 6 characters" className={inputClass} />
+              <input type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} placeholder="Minimum 6 characters" className={inputClass} />
             </div>
 
             {/* Vehicle Info */}

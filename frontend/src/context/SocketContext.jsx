@@ -11,8 +11,12 @@ const SocketContext = ({ children }) => {
     const socketUrl = SOCKET_URL
     const socketInstance = io(socketUrl, {
       autoConnect: true,
-      withCredentials: true,
-      transports: ['websocket', 'polling'],
+      withCredentials: false,
+      transports: ['polling', 'websocket'],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 10
     })
 
     socketInstance.on('connect', () => {
@@ -42,11 +46,6 @@ const SocketContext = ({ children }) => {
 
   const sendMessageToEvent = useCallback((eventName, payload) => {
     if (!socket || !isConnected || !eventName) {
-      console.warn('sendMessageToEvent skipped:', {
-        hasSocket: Boolean(socket),
-        isConnected,
-        eventName,
-      })
       return
     }
 

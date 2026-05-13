@@ -5,6 +5,12 @@ import rideModel from './models/ride.model.js';
 
 let io = null;
 
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    process.env.FRONTEND_URL,
+].filter(Boolean);
+
 const normalizeCoordinates = (value) => {
     if (!value || typeof value !== 'object') {
         return null;
@@ -61,9 +67,12 @@ async function replayPendingRidesForCaptain(captainId, socketId) {
 export function initializeSocket(server) {
     io = new Server(server, {
         cors: {
-            origin: '*',
-            methods: ['GET', 'POST']
-        }
+            origin: allowedOrigins,
+            methods: ['GET', 'POST'],
+            credentials: true
+        },
+        transports: ['websocket', 'polling'],
+        allowUpgrades: true
     });
 
     io.on('connection', (socket) => {

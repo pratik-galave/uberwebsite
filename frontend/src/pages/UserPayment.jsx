@@ -26,6 +26,29 @@ const UserPayment = () => {
   const fareAmount = rideMeta.fare != null ? Number(rideMeta.fare) : 0
   const fareDisplay = fareAmount > 0 ? `₹${fareAmount}` : 'Fare pending'
 
+  const ensureRazorpayLoaded = useCallback(() => {
+    if (typeof window.Razorpay !== 'undefined') {
+      return Promise.resolve(true)
+    }
+
+    return new Promise((resolve, reject) => {
+      const existingScript = document.querySelector('script[data-razorpay-checkout="true"]')
+      if (existingScript) {
+        existingScript.addEventListener('load', () => resolve(true), { once: true })
+        existingScript.addEventListener('error', () => reject(new Error('Failed to load payment service.')), { once: true })
+        return
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+      script.async = true
+      script.dataset.razorpayCheckout = 'true'
+      script.onload = () => resolve(true)
+      script.onerror = () => reject(new Error('Failed to load payment service.'))
+      document.body.appendChild(script)
+    })
+  }, [])
+
   const handleMakePayment = useCallback(async () => {
     if (fareAmount <= 0) {
       setPaymentError('Invalid fare amount')
@@ -56,6 +79,8 @@ const UserPayment = () => {
       }
 
       const { order, key } = data
+
+      await ensureRazorpayLoaded()
 
       // Step 2: Open Razorpay Checkout
       const options = {
@@ -129,7 +154,7 @@ const UserPayment = () => {
         error?.response?.data?.error || error.message || 'Something went wrong. Please try again.'
       )
     }
-  }, [fareAmount, rideMeta.rideId])
+  }, [ensureRazorpayLoaded, fareAmount, rideMeta.rideId])
 
   const handleDone = () => {
     localStorage.removeItem('activeUserRideId')

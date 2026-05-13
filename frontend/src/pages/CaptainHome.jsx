@@ -19,13 +19,15 @@ const CaptainHome = () => {
 
   const [captainStats, setCaptainStats] = useState({ earnings: 0, rides: 0, onlineSeconds: 0 })
 
+  const isLocalDevHost = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname)
+
   const formatOnlineHours = (totalSeconds) => {
     const hours = (totalSeconds / 3600).toFixed(1)
     return hours
   }
 
   const [locationWarning, setLocationWarning] = useState(() => {
-    if (!window.isSecureContext) {
+    if (!window.isSecureContext && !isLocalDevHost) {
       return 'Location sharing requires HTTPS.'
     }
     if (!navigator.geolocation) {
